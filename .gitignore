@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+.yarn/
+
+# Build output
+dist/
+dist-ssr/
+.vite/
+.output/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Agent system files
+docs/superpowers/
+
+# Test artifacts
+test_stderr.txt
+test_stdout.txt
+mysql_stderr.txt
+mysql_stdout.txt
+
+# Misc
+.history
+.ionide
+.vim/
+.npm
+.yarn-integrity
+*.local
