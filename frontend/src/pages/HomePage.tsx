@@ -2,11 +2,13 @@ import { useLocations } from '../hooks/useLocations'
 import { useCategories } from '../hooks/useCategories'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Map, Mountain, School, Store, TreePine, Landmark } from 'lucide-react'
+import { ArrowRight, Map, Mountain, School, Store, TreePine, Landmark, Users } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { LocationCard } from '../components/LocationCard'
 import { CategoryBadge } from '../components/CategoryBadge'
 import { AnimatedSection } from '../components/AnimatedSection'
+import { DemografiChart } from '../components/DemografiChart'
+import { demographics } from '../data/demographics'
 import { motion } from 'framer-motion'
 import type { Location } from '../types'
 
@@ -121,6 +123,58 @@ export function HomePage() {
                 <div className="text-xs text-muted-foreground mt-1 font-medium uppercase tracking-wide">{stat.label}</div>
               </div>
             ))}
+          </div>
+        </AnimatedSection>
+      </section>
+
+      {/* Demografi Warga */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <AnimatedSection>
+          <div className="mb-10">
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground">
+              Demografi Warga
+            </h2>
+            <p className="text-muted-foreground mt-2 text-sm">
+              Data kependudukan Desa Mekarjaya
+            </p>
+          </div>
+
+          {/* Summary Card — Total Penduduk */}
+          <div className="bg-surface-card rounded-2xl border border-border/60 p-6 md:p-8 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 items-center">
+              <div className="text-center md:text-left">
+                <div className="font-heading text-5xl md:text-6xl font-bold text-foreground">
+                  {demographics.totalPenduduk.toLocaleString('id-ID')}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1 font-medium uppercase tracking-wider">
+                  Total Penduduk
+                </div>
+              </div>
+              <div className="relative mx-auto md:mx-0 w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                <Users className="w-8 h-8 md:w-10 md:h-10 text-primary mx-auto" />
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-center md:text-left">
+                <div>
+                  <div className="font-heading text-2xl md:text-3xl font-bold text-foreground">
+                    {demographics.jiwa.laki_laki.toLocaleString('id-ID')}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Laki-laki</div>
+                </div>
+                <div>
+                  <div className="font-heading text-2xl md:text-3xl font-bold text-foreground">
+                    {demographics.jiwa.perempuan.toLocaleString('id-ID')}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Perempuan</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3 Charts Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <DemografiChart title="Kelompok Usia" data={demographics.usia} barColor="#C2410C" delay={0.1} />
+            <DemografiChart title="Pendidikan" data={demographics.pendidikan} barColor="#65A30D" delay={0.15} />
+            <DemografiChart title="Pekerjaan" data={demographics.pekerjaan} barColor="#0D9488" delay={0.2} />
           </div>
         </AnimatedSection>
       </section>
