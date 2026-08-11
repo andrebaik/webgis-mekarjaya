@@ -1,58 +1,51 @@
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import { useTheme } from '../../lib/theme'
-import { Menu, X, MapPin, Sun, Moon } from 'lucide-react'
+import { Menu, X, MapPin } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const languages = [
-  { code: 'id', label: 'ID' },
-  { code: 'su', label: 'SU' },
-  { code: 'en', label: 'EN' },
-]
-
 export function Navbar() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const location = useLocation()
-  const { theme, toggleTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const links = [
     { to: '/', label: t('nav.home') },
+    { to: '/desa', label: t('nav.profil_desa') },
     { to: '/map', label: t('nav.map') },
   ]
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-surface-card">
+    <nav className="sticky top-0 z-50 w-full border-b border-neutral-200/50 bg-[#F4F4F3]/90 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logo Brand */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
-              <MapPin className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-all">
+              <MapPin className="w-4 h-4 text-white" />
             </div>
-            <div className="hidden sm:block">
-              <span className="font-heading font-semibold text-foreground text-lg tracking-tight">
+            <div>
+              <span className="font-heading font-bold text-neutral-900 text-sm tracking-tight block">
                 Mekarjaya
               </span>
-              <span className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground -mt-0.5">
-                WebGIS Desa
+              <span className="block text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-medium -mt-0.5">
+                WebGIS Portal
               </span>
             </div>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1 bg-muted/60 rounded-xl px-1.5 py-1">
+          {/* Desktop Nav Links */}
+          <div className="hidden md:flex items-center gap-1 bg-neutral-200/60 rounded-2xl p-1">
             {links.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 className={cn(
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                  'px-4 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200',
                   location.pathname === link.to
-                    ? 'bg-surface-card text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'bg-white text-neutral-900 shadow-xs border border-neutral-200/70'
+                    : 'text-neutral-500 hover:text-neutral-900'
                 )}
               >
                 {link.label}
@@ -60,49 +53,14 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* Right side */}
           <div className="flex items-center gap-2">
-            {/* Language Switcher */}
-            <div className="hidden sm:flex items-center gap-0.5 bg-muted/60 rounded-lg p-0.5">
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => i18n.changeLanguage(lang.code)}
-                  className={cn(
-                    'px-2.5 py-1 text-xs font-semibold rounded-md transition-all duration-200 cursor-pointer',
-                    i18n.language === lang.code
-                      ? 'bg-surface-card text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  {lang.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2.5 rounded-xl bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer"
-              aria-label="Toggle dark mode"
-            >
-              <motion.div
-                key={theme}
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </motion.div>
-            </button>
-
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2.5 rounded-xl bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer"
-              aria-label="Toggle menu"
+              className="md:hidden p-2 rounded-xl bg-neutral-200/60 text-neutral-600 hover:text-neutral-900 transition-colors cursor-pointer"
+              aria-label={t('nav.toggle_menu')}
             >
-              {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -116,7 +74,7 @@ export function Navbar() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="md:hidden overflow-hidden border-t border-border/40 bg-surface-card"
+            className="md:hidden overflow-hidden border-t border-neutral-200/50 bg-[#F4F4F3]"
           >
             <div className="px-4 py-4 space-y-1">
               {links.map((link) => (
@@ -125,31 +83,15 @@ export function Navbar() {
                   to={link.to}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    'block px-4 py-3 rounded-xl text-sm font-medium transition-colors',
+                    'block px-4 py-3 rounded-xl text-xs font-semibold transition-colors',
                     location.pathname === link.to
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      ? 'bg-white text-neutral-900 shadow-xs border border-neutral-200/70'
+                      : 'text-neutral-500 hover:text-neutral-900'
                   )}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="flex items-center gap-1 pt-3 border-t border-border/40 mt-3">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => { i18n.changeLanguage(lang.code); setMobileOpen(false) }}
-                    className={cn(
-                      'flex-1 px-3 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer',
-                      i18n.language === lang.code
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    )}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
             </div>
           </motion.div>
         )}

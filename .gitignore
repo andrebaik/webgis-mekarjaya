@@ -10,14 +10,23 @@ dist-ssr/
 .vite/
 .output/
 
-# Environment
+# Environment (kredensial DB, JWT_SECRET) — .env.example tetap di-track
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
-# Uploads
-uploads/*
-!uploads/.gitkeep
+# Foto upload admin — pola lama `uploads/*` beranchor ke root repo
+# sehingga backend/uploads/ TIDAK ikut terabaikan. Jangan dilepas slash-nya.
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Dump / backup database — schema.sql & seed.sql di backend/database tetap di-track
+*.sql.gz
+*.dump
+*.mwb.bak
+backup*.sql
+dump*.sql
+*-backup.sql
 
 # Logs
 *.log
@@ -45,6 +54,9 @@ Thumbs.db
 
 # Agent system files
 docs/superpowers/
+AGENT.md
+AGENTS.md
+CLAUDE.md
 
 # Test artifacts
 test_stderr.txt

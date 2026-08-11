@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -9,35 +9,17 @@
   --color-secondary-light: #84CC16;
   --color-accent: #0D9488;
   --color-accent-light: #2DD4BF;
-  --color-surface: #FFF7ED;
+  --color-surface: #F4F4F3;
   --color-surface-card: #FFFFFF;
-  --color-foreground: #1C1917;
+  --color-foreground: #171717;
   --color-muted: #F5F5F4;
-  --color-muted-foreground: #78716C;
-  --color-border: #E7E5E4;
+  --color-muted-foreground: #737373;
+  --color-border: #E5E5E5;
   --color-destructive: #DC2626;
-  --color-ring: #C2410C;
+  --color-ring: #171717;
 
-  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-heading: 'DM Sans', 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
-}
-
-.dark {
-  --color-primary: #FB923C;
-  --color-primary-light: #FDBA74;
-  --color-primary-dark: #F97316;
-  --color-secondary: #84CC16;
-  --color-secondary-light: #A3E635;
-  --color-accent: #2DD4BF;
-  --color-accent-light: #5EEAD4;
-  --color-surface: #1C1917;
-  --color-surface-card: #292524;
-  --color-foreground: #FAFAF9;
-  --color-muted: #44403C;
-  --color-muted-foreground: #A8A29E;
-  --color-border: #57534E;
-  --color-destructive: #EF4444;
-  --color-ring: #FB923C;
 }
 
 body {
@@ -47,7 +29,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-surface);
   color: var(--color-foreground);
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -71,9 +52,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .location-popup .leaflet-popup-content-wrapper {
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  background-color: #FFFFFF;
+  border: 1px solid #E5E5E5;
 }
 
 .location-popup .leaflet-popup-content {
@@ -84,6 +67,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .location-popup .leaflet-popup-tip {
   box-shadow: none;
+  background-color: #FFFFFF;
 }
 
 .location-popup .leaflet-popup-close-button {
@@ -92,8 +76,8 @@ h1, h2, h3, h4, h5, h6 {
   width: 24px !important;
   height: 24px !important;
   font-size: 18px !important;
-  color: var(--color-muted-foreground) !important;
-  border-radius: 6px !important;
+  color: #737373 !important;
+  border-radius: 8px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -101,6 +85,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .location-popup .leaflet-popup-close-button:hover {
-  background-color: var(--color-muted) !important;
-  color: var(--color-foreground) !important;
+  background-color: #F5F5F4 !important;
+  color: #171717 !important;
 }
