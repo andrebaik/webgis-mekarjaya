@@ -8,7 +8,7 @@ const crud = createCrud('village_hamlets', {
 });
 
 // Laporan penduduk bersifat bulanan, jadi "terbaru" ditentukan oleh pasangan
-// (year, month) — bukan year saja seperti tabel demographics.
+// (year, month) — bukan year saja seperti tabel tahunan lain.
 const getLatestPeriod = async () => {
   const [rows] = await pool.query(
     'SELECT year, month FROM village_hamlets ORDER BY year DESC, month DESC LIMIT 1'

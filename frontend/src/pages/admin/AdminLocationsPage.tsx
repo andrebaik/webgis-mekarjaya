@@ -7,6 +7,7 @@ import { Badge } from '../../components/ui/badge'
 import { AdminPageHeader } from '../../components/admin/AdminPageHeader'
 import { DataTable, type Column } from '../../components/admin/DataTable'
 import { ContentField } from '../../components/admin/ContentField'
+import { ImageGalleryField } from '../../components/admin/ImageGalleryField'
 import { adminCreate, adminDelete, adminUpdate } from '../../services/adminApi'
 import { useLocations } from '../../hooks/useLocations'
 import { useCategories } from '../../hooks/useCategories'
@@ -20,6 +21,7 @@ interface LocationForm {
   description_id: string
   coordinates: string
   featured: boolean
+  images: string[]
 }
 
 const emptyForm: LocationForm = {
@@ -29,6 +31,7 @@ const emptyForm: LocationForm = {
   description_id: '',
   coordinates: '[107.83, -7.38]',
   featured: false,
+  images: [],
 }
 
 export function AdminLocationsPage() {
@@ -57,6 +60,7 @@ export function AdminLocationsPage() {
       description_id: row.description_id ?? '',
       coordinates: JSON.stringify(row.coordinates),
       featured: row.featured,
+      images: row.images ?? [],
     })
     setShowForm(true)
   }
@@ -76,6 +80,7 @@ export function AdminLocationsPage() {
       description_id: form.description_id || null,
       coordinates,
       featured: form.featured,
+      images: form.images,
     }
     if (editing) {
       await adminUpdate(`/api/admin/locations/${editing.id}`, body)
@@ -162,6 +167,11 @@ export function AdminLocationsPage() {
             </div>
             <ContentField prefix="name" values={form} onChange={(f, v) => setForm({ ...form, [f]: v })} required />
             <ContentField prefix="description" values={form} onChange={(f, v) => setForm({ ...form, [f]: v })} textarea />
+            <ImageGalleryField
+              label={t('admin.images')}
+              value={form.images}
+              onChange={(images) => setForm({ ...form, images })}
+            />
             <label className="flex items-center gap-2 text-sm font-medium text-foreground cursor-pointer">
               <input
                 type="checkbox"

@@ -46,7 +46,7 @@ export function Footer() {
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="text-xs font-medium text-neutral-600 hover:text-neutral-900 transition-colors inline-flex items-center gap-1"
+                    className="min-h-11 text-xs font-medium text-neutral-600 hover:text-neutral-900 transition-colors motion-reduce:transition-none inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded-lg"
                   >
                     {link.label}
                     <ArrowUpRight className="w-3 h-3 text-neutral-400" />
@@ -66,7 +66,7 @@ export function Footer() {
                 <Link
                   key={cat.id}
                   to={`/map?category=${cat.slug}`}
-                  className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white border border-neutral-200/80 text-neutral-600 hover:text-neutral-900 shadow-xs transition-all"
+                  className="min-h-11 inline-flex items-center text-[11px] font-semibold px-3 rounded-lg bg-white border border-neutral-200/80 text-neutral-600 hover:text-neutral-900 shadow-xs transition-all motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
                 >
                   {cat.name_id}
                 </Link>

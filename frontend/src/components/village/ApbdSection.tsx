@@ -1,160 +1,182 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { AnimatedSection } from '../AnimatedSection'
+import { itemStagger } from '../../lib/motion'
+import { SectionHeading } from '../ui/SectionHeading'
 import { formatRp, formatRpCompact } from '../../lib/utils'
-import type { ApbdItem } from '../../types'
+import { APBD_TYPES, getLatestApbdYear } from '../../lib/apbd'
+import type { ApbdItem, ApbdType } from '../../types'
 
 interface ApbdSectionProps {
   items: ApbdItem[]
 }
 
-const barColors = ['#171717', '#C2410C', '#10B981', '#06B6D4', '#8B5CF6', '#F59E0B', '#EC4899']
+/** Aksen per kolom — dipakai untuk titik penanda dan angka total. */
+const accent: Record<ApbdType, { dot: string; total: string }> = {
+  pelaksanaan: { dot: 'bg-foreground', total: 'text-foreground' },
+  pendapatan: { dot: 'bg-primary', total: 'text-primary' },
+  belanja: { dot: 'bg-emerald-500', total: 'text-emerald-700' },
+}
 
 export function ApbdSection({ items }: ApbdSectionProps) {
   const { t } = useTranslation()
 
-  const pendapatan = useMemo(() => items.filter((i) => i.type === 'pendapatan'), [items])
-  const belanja = useMemo(() => items.filter((i) => i.type === 'belanja'), [items])
-  const totalPendapatan = useMemo(() => pendapatan.reduce((sum, i) => sum + i.amount, 0), [pendapatan])
-  const totalBelanja = useMemo(() => belanja.reduce((sum, i) => sum + i.amount, 0), [belanja])
-
-  // Komposisi belanja per kategori — dihitung di klien karena seluruh item sudah ada di
-  // memori; memanggil /api/apbd/summary hanya menambah request untuk data yang sama.
-  const komposisi = useMemo(() => {
-    const byCategory = new Map<string, number>()
-    for (const item of belanja) {
-      byCategory.set(item.category, (byCategory.get(item.category) ?? 0) + item.amount)
-    }
-    return [...byCategory.entries()]
-      .map(([category, amount]) => ({ category, amount }))
-      .sort((a, b) => b.amount - a.amount)
-  }, [belanja])
-
-  if (items.length === 0) return null
-
-  const selisih = totalPendapatan - totalBelanja
-  const surplus = selisih >= 0
-
-  const renderTable = (rows: ApbdItem[], total: number) => (
-    <div className="bg-white rounded-2xl border border-neutral-200/80 overflow-hidden shadow-xs">
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="bg-neutral-100/50 text-left text-[11px] uppercase tracking-wider text-neutral-400 border-b border-neutral-100">
-            <th className="px-4 py-3 font-semibold">{t('admin.category')}</th>
-            <th className="px-4 py-3 font-semibold">{t('admin.title')}</th>
-            <th className="px-4 py-3 font-semibold text-right">{t('admin.amount')}</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-neutral-100">
-          {rows.map((item) => (
-            <tr key={item.id} className="hover:bg-neutral-50/80 transition-colors">
-              <td className="px-4 py-3 text-neutral-500">{item.category}</td>
-              <td className="px-4 py-3 font-semibold text-neutral-900">{item.title}</td>
-              <td className="px-4 py-3 text-right font-medium text-neutral-900 font-mono">{formatRp(item.amount)}</td>
-            </tr>
-          ))}
-          <tr className="bg-neutral-100/60 font-bold">
-            <td className="px-4 py-3 text-neutral-900" colSpan={2}>
-              {t('village.apbd_total')}
-            </td>
-            <td className="px-4 py-3 text-right text-neutral-900 font-mono">{formatRp(total)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  // Data bisa memuat beberapa tahun sekaligus; menjumlahkannya bersama menghasilkan
+  // total yang salah. Selalu batasi ke tahun terbaru yang ada datanya.
+  const year = useMemo(() => getLatestApbdYear(items), [items])
+  const tahunIni = useMemo(
+    () => (year == null ? [] : items.filter((i) => i.year === year)),
+    [items, year]
   )
 
+  const kolom = useMemo(
+    () =>
+      APBD_TYPES.map((type) => {
+        const rows = tahunIni
+          .filter((i) => i.type === type)
+          .sort((a, b) => a.sort_order - b.sort_order || a.category.localeCompare(b.category))
+        // 'pelaksanaan' TIDAK punya total: Pendapatan/Belanja/Pembiayaan adalah tiga
+        // besaran berbeda, menjumlahkannya menghasilkan angka tanpa arti.
+        const total = type === 'pelaksanaan' ? null : rows.reduce((sum, r) => sum + r.amount, 0)
+        return { type, rows, total }
+      }),
+    [tahunIni]
+  )
+
+  const pendapatan = kolom.find((k) => k.type === 'pendapatan')?.total ?? 0
+  const belanja = kolom.find((k) => k.type === 'belanja')?.total ?? 0
+  const selisih = pendapatan - belanja
+  const surplus = selisih >= 0
+
+  if (tahunIni.length === 0) return null
+
   return (
-    <section id="apbdes" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-neutral-200/50 scroll-mt-32">
-      <AnimatedSection>
-        <div className="mb-8">
-          <h2 className="font-heading text-2xl md:text-3xl font-bold text-neutral-900 tracking-tight">{t('village.apbd')}</h2>
-        </div>
+    <section
+      id="apbdes"
+      className="border-t border-border/60 bg-surface-card py-16 md:py-20 scroll-mt-32"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <AnimatedSection>
+          <SectionHeading
+            eyebrow={t('village.eyebrow_apbd')}
+            title={t('village.apbd')}
+            subtitle={year ? t('village.apbd_subtitle', { year }) : undefined}
+          />
+        </AnimatedSection>
 
-        {/* Ringkasan */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-2xl border border-neutral-200/80 p-5 shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center mb-3">
-              <TrendingUp className="w-5 h-5 text-neutral-900" />
+          {/* Ringkasan pendapatan vs belanja */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <RingkasanKartu
+              icon={TrendingUp}
+              label={t('village.apbd_pendapatan')}
+              value={formatRpCompact(pendapatan)}
+            />
+            <RingkasanKartu
+              icon={TrendingDown}
+              label={t('village.apbd_belanja')}
+              value={formatRpCompact(belanja)}
+            />
+            <div
+              className={`rounded-2xl border p-5 ${
+                surplus ? 'bg-emerald-50/60 border-emerald-200/80' : 'bg-red-50/60 border-red-200/80'
+              }`}
+            >
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${
+                  surplus ? 'bg-emerald-100' : 'bg-red-100'
+                }`}
+              >
+                <Wallet className={`w-5 h-5 ${surplus ? 'text-emerald-700' : 'text-red-600'}`} />
+              </div>
+              <div
+                className={`font-heading text-2xl font-bold tabular-nums ${
+                  surplus ? 'text-emerald-700' : 'text-red-600'
+                }`}
+              >
+                {formatRpCompact(Math.abs(selisih))}
+              </div>
+              <div
+                className={`text-xs font-semibold mt-0.5 ${
+                  surplus ? 'text-emerald-600' : 'text-red-500'
+                }`}
+              >
+                {surplus ? t('village.apbd_surplus') : t('village.apbd_defisit')}
+              </div>
             </div>
-            <div className="font-heading text-2xl font-bold text-neutral-900">{formatRpCompact(totalPendapatan)}</div>
-            <div className="text-xs font-medium text-neutral-400 mt-0.5">{t('village.apbd_pendapatan')}</div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-neutral-200/80 p-5 shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mb-3">
-              <TrendingDown className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div className="font-heading text-2xl font-bold text-neutral-900">{formatRpCompact(totalBelanja)}</div>
-            <div className="text-xs font-medium text-neutral-400 mt-0.5">{t('village.apbd_belanja')}</div>
-          </div>
+          {/* Tiga kolom APBDes */}
+          <AnimatedSection stagger className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {kolom.map(({ type, rows, total }) => (
+              <motion.div
+                key={type}
+                variants={itemStagger}
+                className="bg-surface rounded-3xl border border-border overflow-hidden flex flex-col"
+              >
+                <h3 className="px-5 py-4 border-b border-border/60 font-heading font-bold text-sm text-foreground flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${accent[type].dot}`} />
+                  {t(`village.apbd_type_${type}`)}
+                </h3>
 
-          <div className={`rounded-2xl border p-5 shadow-xs ${surplus ? 'bg-emerald-50/60 border-emerald-200/80' : 'bg-red-50/60 border-red-200/80'}`}>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${surplus ? 'bg-emerald-100' : 'bg-red-100'}`}>
-              <Wallet className={`w-5 h-5 ${surplus ? 'text-emerald-700' : 'text-red-600'}`} />
-            </div>
-            <div className={`font-heading text-2xl font-bold ${surplus ? 'text-emerald-700' : 'text-red-600'}`}>
-              {formatRpCompact(Math.abs(selisih))}
-            </div>
-            <div className={`text-xs font-semibold mt-0.5 ${surplus ? 'text-emerald-600' : 'text-red-500'}`}>
-              {surplus ? t('village.apbd_surplus') : t('village.apbd_defisit')}
-            </div>
-          </div>
-        </div>
-
-        {/* Komposisi belanja */}
-        {komposisi.length > 0 && (
-          <div className="bg-white rounded-3xl border border-neutral-200/80 p-6 md:p-8 mb-6 shadow-xs">
-            <h3 className="font-heading font-bold text-sm text-neutral-900 uppercase tracking-wider mb-5">
-              {t('village.apbd_composition')}
-            </h3>
-            <ResponsiveContainer width="100%" height={Math.max(160, komposisi.length * 48)}>
-              <BarChart data={komposisi} layout="vertical" margin={{ left: 8, right: 24, top: 0, bottom: 0 }}>
-                <XAxis type="number" hide />
-                <YAxis
-                  type="category"
-                  dataKey="category"
-                  // Nama kategori APBDes panjang ("Bidang Penyelenggaraan"); di bawah ~150px
-                  // Recharts memecahnya jadi dua baris dan tabraknya dengan bar.
-                  width={150}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 11, fill: '#737373' }}
-                />
-                <Tooltip
-                  cursor={{ fill: 'rgba(0,0,0,0.04)' }}
-                  formatter={(value) => [formatRp(Number(value)), t('admin.amount')]}
-                  contentStyle={{ borderRadius: 12, border: '1px solid #E5E5E5', fontSize: 12 }}
-                />
-                <Bar dataKey="amount" radius={[0, 8, 8, 0]} barSize={18} isAnimationActive={false}>
-                  {komposisi.map((entry, i) => (
-                    <Cell key={entry.category} fill={barColors[i % barColors.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div>
-            <h3 className="font-heading font-bold text-sm text-neutral-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-neutral-900" />
-              {t('village.apbd_pendapatan')}
-            </h3>
-            {renderTable(pendapatan, totalPendapatan)}
-          </div>
-          <div>
-            <h3 className="font-heading font-bold text-sm text-neutral-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              {t('village.apbd_belanja')}
-            </h3>
-            {renderTable(belanja, totalBelanja)}
-          </div>
-        </div>
-      </AnimatedSection>
+                {rows.length === 0 ? (
+                  <p className="px-5 py-8 text-xs text-muted-foreground text-center flex-1">
+                    {t('village.apbd_empty_type')}
+                  </p>
+                ) : (
+                  <>
+                    <ul className="divide-y divide-border/60 flex-1">
+                      {rows.map((row) => (
+                        <li
+                          key={row.id}
+                          className="px-5 py-3 flex items-baseline justify-between gap-4"
+                        >
+                          <span className="text-xs text-muted-foreground leading-snug">
+                            {row.category}
+                          </span>
+                          <span className="text-xs font-semibold text-foreground tabular-nums whitespace-nowrap">
+                            {formatRp(row.amount)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    {total !== null && (
+                      <div className="px-5 py-3.5 bg-muted border-t border-border/60 flex items-baseline justify-between gap-4">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                          {t('village.apbd_total')}
+                        </span>
+                        <span
+                          className={`text-sm font-bold tabular-nums whitespace-nowrap ${accent[type].total}`}
+                        >
+                          {formatRp(total)}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </motion.div>
+            ))}
+          </AnimatedSection>
+      </div>
     </section>
+  )
+}
+
+interface RingkasanKartuProps {
+  icon: typeof TrendingUp
+  label: string
+  value: string
+}
+
+function RingkasanKartu({ icon: Icon, label, value }: RingkasanKartuProps) {
+  return (
+    <div className="bg-surface rounded-2xl border border-border p-5">
+      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-3">
+        <Icon className="w-5 h-5 text-primary" />
+      </div>
+      <div className="font-heading text-2xl font-bold text-foreground tabular-nums">{value}</div>
+      <div className="text-xs font-medium text-muted-foreground mt-0.5">{label}</div>
+    </div>
   )
 }

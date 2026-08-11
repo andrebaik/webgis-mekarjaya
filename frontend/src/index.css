@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@300;400;500;600;700&display=swap');
+/* Space Grotesk = display/body (mengikuti bahasa visual referensi),
+   VT323 = label monospace untuk eyebrow seksi dan angka. Inter tetap ada
+   sebagai fallback untuk teks panjang dan seluruh panel admin. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=VT323&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -18,8 +21,14 @@
   --color-destructive: #DC2626;
   --color-ring: #171717;
 
-  --font-heading: 'DM Sans', 'Inter', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-mono: 'VT323', ui-monospace, monospace;
+
+  /* Skala tipografi editorial: heading raksasa yang menyusut mulus mengikuti
+     lebar layar, bukan lompat per breakpoint. */
+  --text-display: clamp(2.75rem, 11vw, 9rem);
+  --text-display-sm: clamp(2rem, 7vw, 4.5rem);
 }
 
 body {
@@ -49,6 +58,62 @@ h1, h2, h3, h4, h5, h6 {
 
 ::selection {
   background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+/* Tipografi display: rapat dan optis rata kiri, seperti heading besar referensi. */
+.text-display {
+  font-family: var(--font-heading);
+  font-size: var(--text-display);
+  font-weight: 700;
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+}
+
+.text-display-sm {
+  font-family: var(--font-heading);
+  font-size: var(--text-display-sm);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+/* Label eyebrow monospace di atas tiap seksi. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  /* neutral-800, bukan muted-foreground (#737373): di hero, eyebrow berdiri di
+     atas foto dengan scrim tipis; #737373 jatuh di bawah ambang 4.5:1. */
+  color: #262626;
+}
+
+/* Marquee tak berujung. Dua salinan konten digeser -50% sehingga sambungannya
+   tidak terlihat; berhenti total saat pengguna meminta pengurangan gerak. */
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll var(--marquee-duration, 40s) linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+    transform: none;
+  }
+  html {
+    scroll-behavior: auto !important;
+  }
 }
 
 .location-popup .leaflet-popup-content-wrapper {

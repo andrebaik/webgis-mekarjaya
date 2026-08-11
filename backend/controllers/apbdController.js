@@ -2,7 +2,7 @@ const pool = require('../db');
 const createCrud = require('../lib/crudFactory');
 
 const crud = createCrud('apbd_items', {
-  allowedFields: ['year', 'type', 'category', 'title', 'amount', 'sort_order'],
+  allowedFields: ['year', 'type', 'category', 'amount', 'sort_order'],
   orderBy: 'year DESC, sort_order ASC',
 });
 

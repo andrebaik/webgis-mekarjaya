@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css'
 import { AnimatedSection } from '../AnimatedSection'
 import { MapBoundsUpdater } from '../map/MapBoundsUpdater'
 import { useGeoJson } from '../../hooks/useGeoJson'
+import { SectionHeading } from '../ui/SectionHeading'
 
 export function VillageMiniMap() {
   const { t } = useTranslation()
@@ -16,14 +17,14 @@ export function VillageMiniMap() {
 
   return (
     <AnimatedSection>
-      <div className="mb-6">
-        <h2 className="font-heading text-2xl md:text-3xl font-bold text-neutral-900 tracking-tight">
-          {t('village.map_title')}
-        </h2>
-        <p className="text-xs text-neutral-500 mt-1">{t('village.map_subtitle')}</p>
-      </div>
+      <SectionHeading
+        eyebrow={t('village.eyebrow_map')}
+        title={t('village.map_title')}
+        subtitle={t('village.map_subtitle')}
+        className="mb-8"
+      />
 
-      <div className="relative rounded-3xl overflow-hidden border border-neutral-200/80 shadow-xs">
+      <div className="relative rounded-3xl overflow-hidden border border-border">
         <MapContainer
           center={[-7.384, 107.838]}
           zoom={13}
@@ -57,7 +58,7 @@ export function VillageMiniMap() {
 
         <Link
           to="/map"
-          className="absolute bottom-4 right-4 z-[500] inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-900 text-white text-xs font-semibold shadow-lg hover:bg-neutral-800 transition-colors"
+          className="absolute bottom-4 right-4 z-[500] inline-flex items-center gap-1.5 min-h-11 px-4 rounded-xl bg-foreground text-white text-xs font-semibold shadow-lg hover:bg-neutral-800 transition-colors motion-reduce:transition-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2"
         >
           {t('village.map_open')}
           <ArrowUpRight className="w-3.5 h-3.5" />

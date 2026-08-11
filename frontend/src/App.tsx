@@ -1,4 +1,4 @@
-﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { I18nextProvider } from 'react-i18next'
 import i18n from './lib/i18n'
@@ -15,7 +15,7 @@ import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { AdminLocationsPage } from './pages/admin/AdminLocationsPage'
 import { AdminCategoriesPage } from './pages/admin/AdminCategoriesPage'
 import { AdminProfilePage } from './pages/admin/AdminProfilePage'
-import { AdminDemographicsPage } from './pages/admin/AdminDemographicsPage'
+import { AdminHamletsPage } from './pages/admin/AdminHamletsPage'
 import { AdminApbdPage } from './pages/admin/AdminApbdPage'
 import { AdminPeriodsPage } from './pages/admin/AdminPeriodsPage'
 
@@ -54,7 +54,7 @@ function App() {
                 <Route path="locations" element={<AdminLocationsPage />} />
                 <Route path="categories" element={<AdminCategoriesPage />} />
                 <Route path="profile" element={<AdminProfilePage />} />
-                <Route path="demographics" element={<AdminDemographicsPage />} />
+                <Route path="hamlets" element={<AdminHamletsPage />} />
                 <Route path="apbd" element={<AdminApbdPage />} />
                 <Route path="periods" element={<AdminPeriodsPage />} />
               </Route>

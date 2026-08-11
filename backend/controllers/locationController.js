@@ -1,5 +1,10 @@
 const pool = require('../db');
 
+// MySQL mengembalikan BOOLEAN sebagai TINYINT 0/1. Kalau angka itu diteruskan
+// apa adanya, React merender `{featured && <Badge/>}` menjadi teks "0" pada baris
+// yang tidak unggulan — dan tipe `featured: boolean` di frontend jadi berbohong.
+const toBool = (v) => Boolean(v);
+
 const parseCoordsIfNeeded = (data) => {
   if (typeof data === 'string') {
     try { return JSON.parse(data); } catch { return data; }
@@ -15,7 +20,8 @@ const getAllLocations = async (req, res) => {
     const locations = rows.map(row => ({
       ...row,
       coordinates: parseCoordsIfNeeded(row.coordinates),
-      images: row.images ? parseCoordsIfNeeded(row.images) : []
+      images: row.images ? parseCoordsIfNeeded(row.images) : [],
+      featured: toBool(row.featured)
     }));
     res.json(locations);
   } catch (error) {
@@ -42,7 +48,8 @@ const getLocationBySlug = async (req, res) => {
     const location = {
       ...rows[0],
       coordinates: parseCoordsIfNeeded(rows[0].coordinates),
-      images: rows[0].images ? parseCoordsIfNeeded(rows[0].images) : []
+      images: rows[0].images ? parseCoordsIfNeeded(rows[0].images) : [],
+      featured: toBool(rows[0].featured)
     };
 
     res.json(location);
@@ -88,7 +95,8 @@ const getLocationsByCategory = async (req, res) => {
       locations: locations.map(loc => ({
         ...loc,
         coordinates: parseCoordsIfNeeded(loc.coordinates),
-        images: loc.images ? parseCoordsIfNeeded(loc.images) : []
+        images: loc.images ? parseCoordsIfNeeded(loc.images) : [],
+        featured: toBool(loc.featured)
       }))
     };
 

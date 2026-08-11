@@ -10,22 +10,21 @@ import { adminCreate, adminDelete, adminUpdate } from '../../services/adminApi'
 import { useApbd } from '../../hooks/useApbd'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatRp } from '../../lib/utils'
-import type { ApbdItem } from '../../types'
+import { APBD_TYPES, APBD_CATEGORY_SUGGESTIONS } from '../../lib/apbd'
+import type { ApbdItem, ApbdType } from '../../types'
 
 interface ApbdForm {
   year: number
-  type: 'pendapatan' | 'belanja'
+  type: ApbdType
   category: string
-  title: string
   amount: number
   sort_order: number
 }
 
 const emptyForm: ApbdForm = {
   year: new Date().getFullYear(),
-  type: 'pendapatan',
+  type: 'pelaksanaan',
   category: '',
-  title: '',
   amount: 0,
   sort_order: 0,
 }
@@ -50,9 +49,11 @@ export function AdminApbdPage() {
   const totals = useMemo(() => {
     let pendapatan = 0
     let belanja = 0
+    // Cocokkan tipe secara eksplisit — dengan adanya 'pelaksanaan', pola `else`
+    // akan salah menghitung baris pelaksanaan sebagai belanja.
     for (const item of items ?? []) {
       if (item.type === 'pendapatan') pendapatan += item.amount
-      else belanja += item.amount
+      else if (item.type === 'belanja') belanja += item.amount
     }
     return { pendapatan, belanja }
   }, [items])
@@ -71,7 +72,6 @@ export function AdminApbdPage() {
       year: row.year,
       type: row.type,
       category: row.category,
-      title: row.title,
       amount: row.amount,
       sort_order: row.sort_order,
     })
@@ -99,15 +99,13 @@ export function AdminApbdPage() {
     {
       key: 'type',
       label: t('admin.type'),
-      render: (r) =>
-        r.type === 'pendapatan' ? (
-          <Badge variant="default">{t('village.apbd_pendapatan')}</Badge>
-        ) : (
-          <Badge variant="secondary">{t('village.apbd_belanja')}</Badge>
-        ),
+      render: (r) => (
+        <Badge variant={r.type === 'pelaksanaan' ? 'outline' : r.type === 'pendapatan' ? 'default' : 'secondary'}>
+          {t(`village.apbd_type_${r.type}`)}
+        </Badge>
+      ),
     },
-    { key: 'category', label: t('admin.category'), render: (r) => <span className="text-muted-foreground">{r.category}</span> },
-    { key: 'title', label: t('admin.title'), render: (r) => <span className="font-medium text-foreground">{r.title}</span> },
+    { key: 'category', label: t('village.apbd_pos'), render: (r) => <span className="font-medium text-foreground">{r.category}</span> },
     { key: 'amount', label: t('admin.amount'), render: (r) => <span className="font-medium tabular-nums text-right">{formatRp(r.amount)}</span> },
   ]
 
@@ -169,7 +167,7 @@ export function AdminApbdPage() {
             </Button>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">{t('admin.year')}</label>
                 <Input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: Number(e.target.value) })} />
@@ -178,20 +176,29 @@ export function AdminApbdPage() {
                 <label className="block text-sm font-medium text-foreground mb-1.5">{t('admin.type')}</label>
                 <select
                   value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value as 'pendapatan' | 'belanja' })}
-                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  onChange={(e) => setForm({ ...form, type: e.target.value as ApbdType, category: '' })}
+                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
                 >
-                  <option value="pendapatan">{t('village.apbd_pendapatan')}</option>
-                  <option value="belanja">{t('village.apbd_belanja')}</option>
+                  {APBD_TYPES.map((tp) => (
+                    <option key={tp} value={tp}>{t(`village.apbd_type_${tp}`)}</option>
+                  ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">{t('admin.category')}</label>
-                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">{t('admin.title')}</label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+                <label className="block text-sm font-medium text-foreground mb-1.5">{t('village.apbd_pos')}</label>
+                {/* datalist, bukan select: pos di luar daftar tetap bisa diketik,
+                    sehingga baris lama yang posnya tidak baku masih bisa diedit. */}
+                <Input
+                  list="apbd-pos"
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  required
+                />
+                <datalist id="apbd-pos">
+                  {APBD_CATEGORY_SUGGESTIONS[form.type].map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">{t('admin.amount')}</label>
