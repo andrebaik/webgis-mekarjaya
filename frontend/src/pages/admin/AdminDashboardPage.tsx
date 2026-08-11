@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { ExternalLink, MapPin, Tag, Users, Wallet } from 'lucide-react'
 import { useLocations } from '../../hooks/useLocations'
 import { useCategories } from '../../hooks/useCategories'
-import { useDemographics } from '../../hooks/useDemographics'
+import { useHamlets } from '../../hooks/useHamlets'
+import { getPopulationSummary } from '../../lib/demographics'
 import { useApbd } from '../../hooks/useApbd'
 import { usePeriods } from '../../hooks/usePeriods'
 import { storage } from '../../lib/storage'
@@ -20,7 +21,7 @@ export function AdminDashboardPage() {
   const { t } = useTranslation()
   const locations = useLocations()
   const categories = useCategories()
-  const demographics = useDemographics()
+  const hamlets = useHamlets()
   const apbd = useApbd()
   const periods = usePeriods()
 
@@ -37,12 +38,13 @@ export function AdminDashboardPage() {
     return latestYear ? all.filter((item) => item.year === latestYear) : all
   }, [apbd.data, latestYear])
 
-  const population = useMemo(() => {
-    const rows = demographics.data ?? []
-    const totalRow = rows.find((r) => r.category === 'total' && r.label_key === 'total')
-    if (totalRow) return totalRow.value
-    return rows.filter((r) => r.category === 'jiwa').reduce((sum, r) => sum + r.value, 0)
-  }, [demographics.data])
+  // Pakai sumber yang sama persis dengan halaman publik. Sebelumnya dasbor hanya
+  // membaca tabel `demographics`, sehingga menampilkan 0 jiwa padahal laporan
+  // penduduk per dusun sudah terisi dan halaman depan menampilkan angka penuh.
+  const population = useMemo(
+    () => getPopulationSummary(hamlets.data).total,
+    [hamlets.data]
+  )
 
   const apbdTotals = useMemo(() => {
     let pendapatan = 0

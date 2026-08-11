@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Location, Category, VillageProfile, DemographicRow, ApbdItem, VillagePeriod, Hamlet } from '../types'
+import type { Location, Category, VillageProfile, ApbdItem, VillagePeriod, Hamlet } from '../types'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
@@ -30,11 +30,6 @@ export async function fetchLocationBySlug(slug: string): Promise<Location> {
 
 export async function fetchProfile(): Promise<VillageProfile> {
   const { data } = await api.get('/api/profile')
-  return data
-}
-
-export async function fetchDemographics(year?: number): Promise<DemographicRow[]> {
-  const { data } = await api.get('/api/demographics', { params: year ? { year } : {} })
   return data
 }
 

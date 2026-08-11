@@ -40,7 +40,7 @@ export function SectionNav({ items }: SectionNavProps) {
   if (items.length === 0) return null
 
   return (
-    <nav className="sticky top-16 z-40 bg-[#F4F4F3]/90 backdrop-blur-md border-b border-neutral-200/50">
+    <nav className="sticky top-16 z-40 bg-surface/90 backdrop-blur-md border-b border-border/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-2.5">
           {items.map((item) => (
@@ -53,10 +53,12 @@ export function SectionNav({ items }: SectionNavProps) {
               }}
               aria-current={active === item.id ? 'true' : undefined}
               className={cn(
-                'shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer',
+                'shrink-0 min-h-11 px-4 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer inline-flex items-center',
+                'transition-colors motion-reduce:transition-none',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-inset',
                 active === item.id
-                  ? 'bg-neutral-900 text-white shadow-xs'
-                  : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200/60'
+                  ? 'bg-foreground text-white shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               )}
             >
               {item.label}

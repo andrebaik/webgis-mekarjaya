@@ -3,7 +3,6 @@ const router = express.Router();
 const locationController = require('../controllers/locationController');
 const authController = require('../controllers/authController');
 const villageController = require('../controllers/villageController');
-const demographicController = require('../controllers/demographicController');
 const apbdController = require('../controllers/apbdController');
 const periodController = require('../controllers/periodController');
 const hamletController = require('../controllers/hamletController');
@@ -18,7 +17,6 @@ router.get('/locations/:slug', locationController.getLocationBySlug);
 router.get('/categories', locationController.getAllCategories);
 router.get('/categories/:slug/locations', locationController.getLocationsByCategory);
 router.get('/profile', villageController.getProfile);
-router.get('/demographics', demographicController.list);
 router.get('/hamlets', hamletController.list);
 router.get('/apbd', apbdController.list);
 router.get('/apbd/summary', apbdController.getSummary);
@@ -34,11 +32,6 @@ router.delete('/admin/categories/:id', authenticateToken, locationController.del
 
 // Admin: village profile
 router.put('/admin/profile', authenticateToken, villageController.updateProfile);
-
-// Admin: demographics
-router.post('/admin/demographics', authenticateToken, demographicController.create);
-router.put('/admin/demographics/:id', authenticateToken, demographicController.update);
-router.delete('/admin/demographics/:id', authenticateToken, demographicController.remove);
 
 // Admin: hamlets (rekap penduduk per dusun)
 router.post('/admin/hamlets', authenticateToken, hamletController.create);

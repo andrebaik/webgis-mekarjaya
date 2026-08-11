@@ -58,22 +58,13 @@ export interface Hamlet {
   sort_order: number
 }
 
-export interface DemographicRow {
-  id: number
-  year: number
-  category: 'total' | 'jiwa' | 'pekerjaan'
-  label_key: string
-  label_id: string | null
-  value: number
-  sort_order: number
-}
+export type ApbdType = 'pelaksanaan' | 'pendapatan' | 'belanja'
 
 export interface ApbdItem {
   id: number
   year: number
-  type: 'pendapatan' | 'belanja'
+  type: ApbdType
   category: string
-  title: string
   amount: number
   sort_order: number
 }

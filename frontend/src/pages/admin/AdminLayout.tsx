@@ -9,7 +9,6 @@ import {
   MapPin,
   Tag,
   Timer,
-  Users,
   PiggyBank,
   LayoutDashboard,
   Search,
@@ -55,7 +54,7 @@ const navSections: NavSection[] = [
   {
     title: 'Keuangan & Warga',
     items: [
-      { to: '/admin/demographics', label: 'admin.demographics', icon: Users },
+      { to: '/admin/hamlets', label: 'admin.hamlets', icon: Home },
       { to: '/admin/apbd', label: 'admin.apbd', icon: PiggyBank },
       { to: '/admin/periods', label: 'admin.periods', icon: Timer },
     ],
@@ -85,7 +84,7 @@ export function AdminLayout() {
     if (location.pathname.includes('/locations')) return 'Dashboard > Lokasi'
     if (location.pathname.includes('/categories')) return 'Dashboard > Kategori'
     if (location.pathname.includes('/profile')) return 'Dashboard > Profil Desa'
-    if (location.pathname.includes('/demographics')) return 'Dashboard > Demografi'
+    if (location.pathname.includes('/hamlets')) return 'Dashboard > Penduduk per Dusun'
     if (location.pathname.includes('/apbd')) return 'Dashboard > APBDesa'
     if (location.pathname.includes('/periods')) return 'Dashboard > Periode Kades'
     return 'Dashboard > Overview'

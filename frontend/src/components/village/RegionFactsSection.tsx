@@ -1,8 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { Maximize2, Mountain, Home, Users, Compass } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { AnimatedSection } from '../AnimatedSection'
-import { formatNumber } from '../../lib/utils'
+import { itemStagger } from '../../lib/motion'
 import type { VillageProfile } from '../../types'
+import { SectionHeading } from '../ui/SectionHeading'
+import { CountUp } from '../ui/CountUp'
 
 interface RegionFactsSectionProps {
   profile: VillageProfile
@@ -14,18 +17,19 @@ export function RegionFactsSection({ profile }: RegionFactsSectionProps) {
   // mysql2 mengirim DECIMAL sebagai string, jadi normalkan dulu sebelum diformat.
   const area = profile.area_km2 == null ? null : Number(profile.area_km2)
 
+  // `raw` dipakai CountUp (butuh angka), bukan string terformat.
   const facts = [
     area != null && !Number.isNaN(area)
-      ? { icon: Maximize2, label: t('village.area'), value: formatNumber(area), unit: t('village.area_unit') }
+      ? { icon: Maximize2, label: t('village.area'), raw: area, unit: t('village.area_unit') }
       : null,
     profile.altitude_m != null
-      ? { icon: Mountain, label: t('village.altitude'), value: formatNumber(profile.altitude_m), unit: t('village.altitude_unit') }
+      ? { icon: Mountain, label: t('village.altitude'), raw: profile.altitude_m, unit: t('village.altitude_unit') }
       : null,
     profile.rw_count != null
-      ? { icon: Home, label: t('village.rw_count'), value: formatNumber(profile.rw_count), unit: 'RW' }
+      ? { icon: Home, label: t('village.rw_count'), raw: profile.rw_count, unit: 'RW' }
       : null,
     profile.rt_count != null
-      ? { icon: Users, label: t('village.rt_count'), value: formatNumber(profile.rt_count), unit: 'RT' }
+      ? { icon: Users, label: t('village.rt_count'), raw: profile.rt_count, unit: 'RT' }
       : null,
   ].filter((f): f is NonNullable<typeof f> => f !== null)
 
@@ -39,51 +43,56 @@ export function RegionFactsSection({ profile }: RegionFactsSectionProps) {
   if (facts.length === 0 && boundaries.length === 0) return null
 
   return (
-    <section id="wilayah" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-neutral-200/50 scroll-mt-32">
+    <section id="wilayah" className="border-t border-border/60 bg-surface-card py-16 md:py-20 scroll-mt-32">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <AnimatedSection>
-        <div className="mb-8">
-          <h2 className="font-heading text-2xl md:text-3xl font-bold text-neutral-900 tracking-tight">
-            {t('village.region')}
-          </h2>
-          <p className="text-xs text-neutral-500 mt-1">{t('village.region_subtitle')}</p>
-        </div>
+        <SectionHeading
+          eyebrow={t('village.eyebrow_region')}
+          title={t('village.region')}
+          subtitle={t('village.region_subtitle')}
+        />
+      </AnimatedSection>
 
         {facts.length > 0 && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <AnimatedSection stagger className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {facts.map((fact) => (
-              <div key={fact.label} className="bg-white rounded-2xl border border-neutral-200/80 p-5 shadow-xs">
-                <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center mb-3">
-                  <fact.icon className="w-5 h-5 text-neutral-900" />
+              <motion.div
+                key={fact.label}
+                variants={itemStagger}
+                className="bg-surface rounded-2xl border border-border p-5"
+              >
+                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-3">
+                  <fact.icon className="w-5 h-5 text-primary" />
                 </div>
-                <div className="font-heading text-2xl font-bold text-neutral-900">
-                  {fact.value}
-                  <span className="text-sm font-semibold text-neutral-400 ml-1">{fact.unit}</span>
+                <div className="font-heading text-3xl font-bold text-foreground">
+                  <CountUp value={fact.raw} />
+                  <span className="text-sm font-semibold text-muted-foreground ml-1">{fact.unit}</span>
                 </div>
-                <div className="text-xs font-medium text-neutral-400 mt-0.5">{fact.label}</div>
-              </div>
+                <div className="text-xs font-medium text-muted-foreground mt-1">{fact.label}</div>
+              </motion.div>
             ))}
-          </div>
+          </AnimatedSection>
         )}
 
         {boundaries.length > 0 && (
-          <div className="bg-white rounded-3xl border border-neutral-200/80 p-6 md:p-8 shadow-xs">
-            <h3 className="font-heading font-bold text-sm text-neutral-900 uppercase tracking-wider mb-5 flex items-center gap-2">
-              <Compass className="w-4 h-4 text-neutral-900" />
+          <div className="bg-surface rounded-3xl border border-border p-6 md:p-8">
+            <h3 className="font-heading font-bold text-sm text-foreground uppercase tracking-wider mb-5 flex items-center gap-2">
+              <Compass className="w-4 h-4 text-primary" />
               {t('village.boundaries')}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {boundaries.map((boundary) => (
-                <div key={boundary.label} className="flex items-start gap-3 px-4 py-3 rounded-2xl bg-neutral-100/60 border border-neutral-200/60">
-                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-neutral-400 w-14 mt-0.5">
+                <div key={boundary.label} className="flex items-start gap-3 px-4 py-3 rounded-2xl bg-muted border border-border/60">
+                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted-foreground w-14 mt-0.5">
                     {boundary.label}
                   </span>
-                  <span className="text-sm font-medium text-neutral-700">{boundary.value}</span>
+                  <span className="text-sm font-medium text-foreground">{boundary.value}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
-      </AnimatedSection>
+      </div>
     </section>
   )
 }

@@ -1,15 +1,17 @@
 ﻿import { Outlet, useLocation } from 'react-router'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
-import { ScrollProgress } from '../ScrollProgress'
 import { motion } from 'framer-motion'
+import { useSmoothScroll } from '../../hooks/useSmoothScroll'
 
 export function RootLayout() {
   const location = useLocation()
+  // Sengaja di RootLayout, bukan App: halaman peta ada di luar layout ini sehingga
+  // Leaflet tetap memakai scroll native untuk zoom.
+  useSmoothScroll()
 
   return (
     <div className="min-h-screen flex flex-col">
-      <ScrollProgress />
       <Navbar />
       <motion.main
         key={location.pathname}

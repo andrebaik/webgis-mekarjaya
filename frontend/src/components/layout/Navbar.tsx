@@ -21,7 +21,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Brand */}
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link to="/" className="flex items-center gap-3 group min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded-xl">
             <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-all">
               <MapPin className="w-4 h-4 text-white" />
             </div>
@@ -42,7 +42,8 @@ export function Navbar() {
                 key={link.to}
                 to={link.to}
                 className={cn(
-                  'px-4 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200',
+                  'min-h-11 px-4 inline-flex items-center rounded-xl text-xs font-semibold transition-all duration-200 motion-reduce:transition-none',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900',
                   location.pathname === link.to
                     ? 'bg-white text-neutral-900 shadow-xs border border-neutral-200/70'
                     : 'text-neutral-500 hover:text-neutral-900'
@@ -57,7 +58,7 @@ export function Navbar() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-xl bg-neutral-200/60 text-neutral-600 hover:text-neutral-900 transition-colors cursor-pointer"
+              className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl bg-neutral-200/60 text-neutral-600 hover:text-neutral-900 transition-colors motion-reduce:transition-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
               aria-label={t('nav.toggle_menu')}
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -83,7 +84,8 @@ export function Navbar() {
                   to={link.to}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    'block px-4 py-3 rounded-xl text-xs font-semibold transition-colors',
+                    'flex items-center min-h-11 px-4 rounded-xl text-xs font-semibold transition-colors motion-reduce:transition-none',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900',
                     location.pathname === link.to
                       ? 'bg-white text-neutral-900 shadow-xs border border-neutral-200/70'
                       : 'text-neutral-500 hover:text-neutral-900'
