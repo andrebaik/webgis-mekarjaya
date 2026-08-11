@@ -1,15 +1,4 @@
-const mysql = require('mysql2/promise');
-require('dotenv').config();
-
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+const pool = require('../db');
 
 const parseCoordsIfNeeded = (data) => {
   if (typeof data === 'string') {
@@ -21,11 +10,12 @@ const parseCoordsIfNeeded = (data) => {
 const getAllLocations = async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, slug, name_id, name_su, name_en, coordinates, featured, created_at FROM locations ORDER BY created_at DESC'
+      'SELECT id, slug, category_id, name_id, description_id, coordinates, images, featured, created_at FROM locations ORDER BY created_at DESC'
     );
     const locations = rows.map(row => ({
       ...row,
-      coordinates: parseCoordsIfNeeded(row.coordinates)
+      coordinates: parseCoordsIfNeeded(row.coordinates),
+      images: row.images ? parseCoordsIfNeeded(row.images) : []
     }));
     res.json(locations);
   } catch (error) {
@@ -65,7 +55,7 @@ const getLocationBySlug = async (req, res) => {
 const getAllCategories = async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, slug, name_id, name_su, name_en, icon FROM categories ORDER BY name_id ASC'
+      'SELECT id, slug, name_id, icon FROM categories ORDER BY name_id ASC'
     );
     res.json(rows);
   } catch (error) {
@@ -87,7 +77,7 @@ const getLocationsByCategory = async (req, res) => {
     }
 
     const [locations] = await pool.query(
-      `SELECT id, slug, name_id, name_su, name_en, coordinates, featured, created_at
+      `SELECT id, slug, category_id, name_id, description_id, coordinates, images, featured, created_at
        FROM locations WHERE category_id = ?
        ORDER BY created_at DESC`,
       [category[0].id]
@@ -97,7 +87,8 @@ const getLocationsByCategory = async (req, res) => {
       category: category[0],
       locations: locations.map(loc => ({
         ...loc,
-        coordinates: parseCoordsIfNeeded(loc.coordinates)
+        coordinates: parseCoordsIfNeeded(loc.coordinates),
+        images: loc.images ? parseCoordsIfNeeded(loc.images) : []
       }))
     };
 
@@ -110,16 +101,16 @@ const getLocationsByCategory = async (req, res) => {
 
 const createLocation = async (req, res) => {
   try {
-    const { slug, category_id, name_id, name_su, name_en, description_id, description_su, description_en, coordinates, images, featured } = req.body;
+    const { slug, category_id, name_id, description_id, coordinates, images, featured } = req.body;
 
-    if (!slug || !category_id || !name_id || !name_su || !name_en || !coordinates) {
-      return res.status(400).json({ message: 'Missing required fields: slug, category_id, name_id, name_su, name_en, coordinates' });
+    if (!slug || !category_id || !name_id || !coordinates) {
+      return res.status(400).json({ message: 'Missing required fields: slug, category_id, name_id, coordinates' });
     }
 
     const [result] = await pool.query(
-      `INSERT INTO locations (slug, category_id, name_id, name_su, name_en, description_id, description_su, description_en, coordinates, images, featured)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [slug, category_id, name_id, name_su, name_en, description_id || null, description_su || null, description_en || null, JSON.stringify(coordinates), images ? JSON.stringify(images) : null, featured || false]
+      `INSERT INTO locations (slug, category_id, name_id, description_id, coordinates, images, featured)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [slug, category_id, name_id, description_id || null, JSON.stringify(coordinates), images ? JSON.stringify(images) : null, featured || false]
     );
 
     res.status(201).json({ id: result.insertId, slug, message: 'Location created successfully' });
@@ -135,7 +126,7 @@ const createLocation = async (req, res) => {
 const updateLocation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { slug, category_id, name_id, name_su, name_en, description_id, description_su, description_en, coordinates, images, featured } = req.body;
+    const { slug, category_id, name_id, description_id, coordinates, images, featured } = req.body;
 
     const [existing] = await pool.query('SELECT id FROM locations WHERE id = ?', [id]);
     if (existing.length === 0) {
@@ -148,11 +139,7 @@ const updateLocation = async (req, res) => {
     if (slug !== undefined) { fields.push('slug = ?'); values.push(slug); }
     if (category_id !== undefined) { fields.push('category_id = ?'); values.push(category_id); }
     if (name_id !== undefined) { fields.push('name_id = ?'); values.push(name_id); }
-    if (name_su !== undefined) { fields.push('name_su = ?'); values.push(name_su); }
-    if (name_en !== undefined) { fields.push('name_en = ?'); values.push(name_en); }
     if (description_id !== undefined) { fields.push('description_id = ?'); values.push(description_id); }
-    if (description_su !== undefined) { fields.push('description_su = ?'); values.push(description_su); }
-    if (description_en !== undefined) { fields.push('description_en = ?'); values.push(description_en); }
     if (coordinates !== undefined) { fields.push('coordinates = ?'); values.push(JSON.stringify(coordinates)); }
     if (images !== undefined) { fields.push('images = ?'); values.push(JSON.stringify(images)); }
     if (featured !== undefined) { fields.push('featured = ?'); values.push(featured); }
@@ -191,4 +178,57 @@ const deleteLocation = async (req, res) => {
   }
 };
 
-module.exports = { getAllLocations, getLocationBySlug, getAllCategories, getLocationsByCategory, createLocation, updateLocation, deleteLocation };
+const createCategory = async (req, res) => {
+  try {
+    const { slug, name_id, icon } = req.body;
+    if (!slug || !name_id) {
+      return res.status(400).json({ message: 'Missing required fields: slug, name_id' });
+    }
+    const [result] = await pool.query(
+      'INSERT INTO categories (slug, name_id, icon) VALUES (?, ?, ?)',
+      [slug, name_id, icon || null]
+    );
+    res.status(201).json({ id: result.insertId, slug, message: 'Category created successfully' });
+  } catch (error) {
+    console.error('Failed to create category:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: 'A category with this slug already exists' });
+    }
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { slug, name_id, icon } = req.body;
+    const fields = [];
+    const values = [];
+    if (slug !== undefined) { fields.push('slug = ?'); values.push(slug); }
+    if (name_id !== undefined) { fields.push('name_id = ?'); values.push(name_id); }
+    if (icon !== undefined) { fields.push('icon = ?'); values.push(icon); }
+    if (fields.length === 0) return res.status(400).json({ message: 'No fields to update' });
+    values.push(id);
+    await pool.query(`UPDATE categories SET ${fields.join(', ')} WHERE id = ?`, values);
+    res.json({ message: 'Category updated successfully' });
+  } catch (error) {
+    console.error(`Failed to update category ${req.params.id}:`, error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: 'A category with this slug already exists' });
+    }
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM categories WHERE id = ?', [id]);
+    res.json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    console.error(`Failed to delete category ${req.params.id}:`, error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+module.exports = { getAllLocations, getLocationBySlug, getAllCategories, getLocationsByCategory, createLocation, updateLocation, deleteLocation, createCategory, updateCategory, deleteCategory };

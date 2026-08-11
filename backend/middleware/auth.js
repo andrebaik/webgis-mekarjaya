@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -6,11 +8,13 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Access token required' });
   }
 
-  if (token !== process.env.ADMIN_TOKEN) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.admin = { id: decoded.id, username: decoded.username };
+    next();
+  } catch (err) {
     return res.status(403).json({ message: 'Invalid or expired token' });
   }
-
-  next();
 };
 
 module.exports = authenticateToken;

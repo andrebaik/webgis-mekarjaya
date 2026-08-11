@@ -2,17 +2,18 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '../lib/utils'
 
 const categoryColors: Record<string, { bg: string; text: string; dot: string }> = {
-  sekolah: { bg: 'bg-blue-50 dark:bg-blue-950/30', text: 'text-blue-700 dark:text-blue-300', dot: 'bg-blue-500' },
-  puskesmas: { bg: 'bg-red-50 dark:bg-red-950/30', text: 'text-red-700 dark:text-red-300', dot: 'bg-red-500' },
-  desa: { bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-300', dot: 'bg-amber-500' },
-  ibadah: { bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-300', dot: 'bg-emerald-500' },
-  wisata: { bg: 'bg-purple-50 dark:bg-purple-950/30', text: 'text-purple-700 dark:text-purple-300', dot: 'bg-purple-500' },
-  umkm: { bg: 'bg-orange-50 dark:bg-orange-950/30', text: 'text-orange-700 dark:text-orange-300', dot: 'bg-orange-500' },
-  lapangan: { bg: 'bg-green-50 dark:bg-green-950/30', text: 'text-green-700 dark:text-green-300', dot: 'bg-green-500' },
-  jembatan: { bg: 'bg-cyan-50 dark:bg-cyan-950/30', text: 'text-cyan-700 dark:text-cyan-300', dot: 'bg-cyan-500' },
-  sungai: { bg: 'bg-sky-50 dark:bg-sky-950/30', text: 'text-sky-700 dark:text-sky-300', dot: 'bg-sky-500' },
-  pasar: { bg: 'bg-pink-50 dark:bg-pink-950/30', text: 'text-pink-700 dark:text-pink-300', dot: 'bg-pink-500' },
-  perkebunan: { bg: 'bg-lime-50 dark:bg-lime-950/30', text: 'text-lime-700 dark:text-lime-300', dot: 'bg-lime-500' },
+  sekolah: { bg: 'bg-blue-50 border-blue-200/60', text: 'text-blue-700', dot: 'bg-blue-500' },
+  puskesmas: { bg: 'bg-red-50 border-red-200/60', text: 'text-red-700', dot: 'bg-red-500' },
+  desa: { bg: 'bg-amber-50 border-amber-200/60', text: 'text-amber-700', dot: 'bg-amber-500' },
+  ibadah: { bg: 'bg-emerald-50 border-emerald-200/60', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  wisata: { bg: 'bg-purple-50 border-purple-200/60', text: 'text-purple-700', dot: 'bg-purple-500' },
+  umkm: { bg: 'bg-orange-50 border-orange-200/60', text: 'text-orange-700', dot: 'bg-orange-500' },
+  lapangan: { bg: 'bg-green-50 border-green-200/60', text: 'text-green-700', dot: 'bg-green-500' },
+  jembatan: { bg: 'bg-cyan-50 border-cyan-200/60', text: 'text-cyan-700', dot: 'bg-cyan-500' },
+  sungai: { bg: 'bg-sky-50 border-sky-200/60', text: 'text-sky-700', dot: 'bg-sky-500' },
+  pasar: { bg: 'bg-pink-50 border-pink-200/60', text: 'text-pink-700', dot: 'bg-pink-500' },
+  perkebunan: { bg: 'bg-lime-50 border-lime-200/60', text: 'text-lime-700', dot: 'bg-lime-500' },
+  'fasilitas-umum': { bg: 'bg-indigo-50 border-indigo-200/60', text: 'text-indigo-700', dot: 'bg-indigo-500' },
 }
 
 interface CategoryBadgeProps {
@@ -25,7 +26,11 @@ interface CategoryBadgeProps {
 
 export function CategoryBadge({ slug, name, className, active, onClick }: CategoryBadgeProps) {
   const { t } = useTranslation()
-  const colors = categoryColors[slug] || { bg: 'bg-gray-50 dark:bg-gray-950/30', text: 'text-gray-700 dark:text-gray-300', dot: 'bg-gray-400' }
+  const colors = categoryColors[slug] || {
+    bg: 'bg-neutral-100 border-neutral-200',
+    text: 'text-neutral-700',
+    dot: 'bg-neutral-400',
+  }
   const label = name || t(`category.${slug}`, slug)
 
   const Component = onClick ? 'button' : 'span'
@@ -33,12 +38,15 @@ export function CategoryBadge({ slug, name, className, active, onClick }: Catego
   return (
     <Component
       onClick={onClick}
+      {...(onClick ? { type: 'button' as const, 'aria-pressed': Boolean(active) } : {})}
       className={cn(
-        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
+        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border shadow-xs transition-all duration-200 motion-reduce:transition-none',
         active
-          ? `${colors.bg} ${colors.text} ring-2 ring-offset-1 ring-offset-surface ${colors.dot.replace('bg-', 'ring-')}`
+          ? `${colors.bg} ${colors.text} ring-2 ring-neutral-900/20 font-bold`
           : `${colors.bg} ${colors.text}`,
-        onClick && 'cursor-pointer hover:scale-[1.03] active:scale-[0.97]',
+        onClick &&
+          'cursor-pointer hover:scale-[1.02] active:scale-[0.98] motion-reduce:hover:scale-100 motion-reduce:active:scale-100 ' +
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900',
         className
       )}
     >

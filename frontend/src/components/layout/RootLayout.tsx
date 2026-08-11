@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom'
+﻿import { Outlet, useLocation } from 'react-router'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { ScrollProgress } from '../ScrollProgress'

@@ -1,19 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import api from '../services/api'
+import { fetchCategories } from '../services/api'
 import type { Category } from '../types'
 
-export interface CategoryWithCount extends Category {
-  location_count?: number
-}
-
-const getCategories = async (): Promise<CategoryWithCount[]> => {
-  const { data } = await api.get('/api/categories')
-  return data
-}
-
 export const useCategories = () => {
-  return useQuery<CategoryWithCount[], Error>({
+  return useQuery<Category[], Error>({
     queryKey: ['categories'],
-    queryFn: getCategories,
+    queryFn: fetchCategories,
   })
 }

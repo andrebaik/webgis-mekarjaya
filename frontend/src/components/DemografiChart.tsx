@@ -1,10 +1,15 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { motion } from 'framer-motion'
-import type { DemografikItem } from '../data/demographics'
+
+export interface DemografiChartItem {
+  label_key: string
+  label: string
+  value: number
+}
 
 interface DemografiChartProps {
   title: string
-  data: DemografikItem[]
+  data: DemografiChartItem[]
   barColor: string
   delay?: number
 }
@@ -16,7 +21,7 @@ function formatNumber(n: number): string {
 function CustomTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-surface-card border border-border rounded-lg px-3 py-2 shadow-lg text-sm font-medium text-foreground">
+    <div className="bg-white border border-neutral-200 rounded-xl px-3 py-2 shadow-md text-xs font-semibold text-neutral-900">
       {payload[0]?.payload?.label}: {formatNumber(payload[0].value)}
     </div>
   )
@@ -29,8 +34,8 @@ function CustomYAxisTick({ x, y, payload }: any) {
       y={y}
       dy={4}
       textAnchor="end"
-      className="fill-muted-foreground text-xs"
-      fontSize={13}
+      className="fill-neutral-500 text-xs font-medium"
+      fontSize={12}
     >
       {payload.value}
     </text>
@@ -38,7 +43,7 @@ function CustomYAxisTick({ x, y, payload }: any) {
 }
 
 export function DemografiChart({ title, data, barColor, delay = 0 }: DemografiChartProps) {
-  const maxValue = Math.max(...data.map((d) => d.value))
+  const maxValue = Math.max(...data.map((d) => d.value), 1)
 
   return (
     <motion.div
@@ -46,10 +51,12 @@ export function DemografiChart({ title, data, barColor, delay = 0 }: DemografiCh
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
-      className="bg-surface-card rounded-2xl border border-border/60 p-5 hover:shadow-md transition-shadow duration-300"
+      className="bg-white rounded-2xl border border-neutral-200/80 p-5 shadow-xs flex flex-col justify-between"
     >
-      <h3 className="font-heading font-semibold text-base text-foreground mb-4">{title}</h3>
-      <div style={{ width: '100%', height: data.length * 48 + 16 }}>
+      <h3 className="font-heading font-semibold text-sm text-neutral-900 mb-4 uppercase tracking-wider text-[11px] text-neutral-400">
+        {title}
+      </h3>
+      <div style={{ width: '100%', height: data.length * 44 + 16 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             layout="vertical"
@@ -66,18 +73,16 @@ export function DemografiChart({ title, data, barColor, delay = 0 }: DemografiCh
               tick={<CustomYAxisTick />}
               width={110}
             />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ fill: 'var(--color-muted)', opacity: 0.5 }}
-            />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F5F5F4', opacity: 0.7 }} />
             <Bar
               dataKey="value"
               fill={barColor}
               radius={[0, 6, 6, 0]}
-              maxBarSize={22}
-              animationBegin={0}
-              animationDuration={800}
-              animationEasing="ease-out"
+              maxBarSize={20}
+              // Recharts 3.10: animasi masuk pada bar tidak pernah selesai di setup ini,
+              // menyisakan <g class="recharts-inactive-bar"> kosong sehingga bar tidak
+              // pernah tergambar. Dimatikan; kartu sudah dianimasikan framer-motion.
+              isAnimationActive={false}
             />
           </BarChart>
         </ResponsiveContainer>

@@ -5,6 +5,7 @@ const multer = require('multer');
 const path = require('path');
 
 const apiRoutes = require('./routes/api');
+const authenticateToken = require('./middleware/auth');
 
 const app = express();
 
@@ -24,7 +25,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
+  filename: (req, file, cb) => {
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    cb(null, `${Date.now()}-${safeName}`);
+  },
 });
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -39,7 +43,7 @@ const upload = multer({ storage, fileFilter, limits: { fileSize: MAX_SIZE } });
 
 app.use('/api', apiRoutes);
 
-app.post('/api/upload', (req, res, next) => {
+app.post('/api/upload', authenticateToken, (req, res, next) => {
   upload.single('image')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ message: 'File too large. Max 5MB.' });

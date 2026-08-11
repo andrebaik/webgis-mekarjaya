@@ -1,32 +1,24 @@
-# React + TypeScript + Vite
+# WebGIS Mekarjaya — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React 19 + Vite 8 + TypeScript + Tailwind CSS v4 (via `@tailwindcss/vite`) application for the WebGIS Desa Mekarjaya project.
 
-Currently, two official plugins are available:
+## Scripts
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Command            | Description                                  |
+| ------------------ | -------------------------------------------- |
+| `npm run dev`      | Start the Vite dev server (`http://localhost:5173`) |
+| `npm run build`    | Type-check (`tsc -b`) then build (`vite build`) |
+| `npm run lint`     | Run Oxlint (`.oxlintrc.json`)                |
+| `npm run preview`  | Preview the production build                 |
 
-## React Compiler
+## Stack Notes
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Data fetching:** TanStack Query hooks in `src/hooks/` talking to the Express API via `src/services/api.ts` (Axios).
+- **Maps:** Leaflet + `react-leaflet` v5 + `react-leaflet-cluster`.
+- **Styling:** Tailwind v4 with design tokens declared in `src/index.css` via `@theme` (no JS config file). Dark mode via a `.dark` class on `<html>`.
+- **i18n:** `i18next` with a single `id` (Indonesian) locale in `src/lib/i18n.ts`, kept as the central string catalog.
+- **UI primitives:** shadcn/ui components in `src/components/ui/`.
 
-## Expanding the Oxlint configuration
+## Backend dependency
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The app expects the Express backend from the repository root (`backend/`) to be running on `http://localhost:5000`. Override with `VITE_API_URL` if needed.
