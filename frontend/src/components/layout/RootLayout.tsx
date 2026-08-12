@@ -11,7 +11,9 @@ export function RootLayout() {
   useSmoothScroll()
 
   return (
-    <div className="min-h-screen flex flex-col">
+    // pb-24 di mobile: pil navigasi melayang di bawah layar dan akan menutupi
+    // footer kalau tidak diberi ruang. Di desktop pil pindah ke atas, jadi 0.
+    <div className="min-h-screen flex flex-col pb-24 sm:pb-0">
       <Navbar />
       <motion.main
         key={location.pathname}

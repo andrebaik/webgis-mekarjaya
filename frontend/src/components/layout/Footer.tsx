@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { useCategories } from '../../hooks/useCategories'
-import { MapPin, Heart, ArrowUpRight } from 'lucide-react'
+import { Heart, ArrowUpRight } from 'lucide-react'
 import { Link } from 'react-router'
+import { BrandMark } from './BrandMark'
 
 export function Footer() {
   const { t } = useTranslation()
@@ -18,19 +19,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           {/* Brand */}
           <div className="md:col-span-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center shadow-xs">
-                <MapPin className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <span className="font-heading font-bold text-sm tracking-tight block text-neutral-900">
-                  {t('footer.title')}
-                </span>
-                <span className="block text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-medium -mt-0.5">
-                  {t('hero.region')}
-                </span>
-              </div>
-            </div>
+            <BrandMark title={t('footer.title')} subtitle={t('hero.region')} size={40} />
             <p className="text-xs text-neutral-500 leading-relaxed max-w-sm">
               {t('footer.desc')}
             </p>

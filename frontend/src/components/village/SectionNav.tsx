@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { cn } from '../../lib/utils'
+import { scrollKeElemen } from '../../hooks/useSmoothScroll'
 
 export interface SectionNavItem {
   id: string
@@ -40,7 +41,9 @@ export function SectionNav({ items }: SectionNavProps) {
   if (items.length === 0) return null
 
   return (
-    <nav className="sticky top-16 z-40 bg-surface/90 backdrop-blur-md border-b border-border/60">
+    // top-24 di desktop: pil navigasi melayang menempati ~24-68px dari atas.
+    // Di mobile pil ada di bawah layar, jadi nav ini boleh menempel di atas.
+    <nav className="sticky top-2 sm:top-24 z-40 bg-surface/90 backdrop-blur-md border-b border-border/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-2.5">
           {items.map((item) => (
@@ -49,7 +52,10 @@ export function SectionNav({ items }: SectionNavProps) {
               href={`#${item.id}`}
               onClick={(e) => {
                 e.preventDefault()
-                document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                const el = document.getElementById(item.id)
+                // 168px = ruang untuk pil navigasi melayang (berakhir ~70px) +
+                // nav ini sendiri (menempel di 96px, tinggi ~65px) + sedikit nafas.
+                if (el) scrollKeElemen(el, 168)
               }}
               aria-current={active === item.id ? 'true' : undefined}
               className={cn(

@@ -14,6 +14,7 @@ import {
   Search,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { BrandMark } from '../../components/layout/BrandMark'
 import { storage } from '../../lib/storage'
 import { useAdminAuth } from '../../hooks/useAdminAuth'
 import { Avatar, AvatarFallback } from '../../components/ui/avatar'
@@ -143,17 +144,12 @@ export function AdminLayout() {
         {/* Workspace Card Header */}
         <div className="bg-white rounded-2xl border border-neutral-200/80 p-3 shadow-xs flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
-              <MapPin className="w-4 h-4 text-white" />
-            </div>
-            <div className="min-w-0">
-              <div className="font-heading font-bold text-xs text-neutral-900 truncate">
-                Desa Mekarjaya
-              </div>
-              <div className="text-[10px] text-neutral-400 font-medium truncate">
-                Admin Portal
-              </div>
-            </div>
+            <BrandMark
+              title="Desa Mekarjaya"
+              subtitle="Admin Portal"
+              size={34}
+              titleClassName="text-xs"
+            />
           </div>
           <ChevronsUpDown className="w-4 h-4 text-neutral-400 shrink-0 cursor-pointer hover:text-neutral-600" />
         </div>
