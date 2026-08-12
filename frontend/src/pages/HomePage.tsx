@@ -15,7 +15,6 @@ import { Marquee } from '../components/ui/Marquee'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { CountUp } from '../components/ui/CountUp'
 import { getPopulationSummary } from '../lib/demographics'
-import { categoryColor } from '../lib/leafletIcons'
 import type { Location } from '../types'
 
 export function HomePage() {
@@ -148,18 +147,19 @@ export function HomePage() {
       </HeroParallax>
 
       {/* ── MARQUEE KATEGORI ─────────────────────────────────────────── */}
-      <div className="border-y border-border/60 py-5 bg-surface">
+      <div className="border-y border-border/60 py-3.5 bg-surface">
         <Marquee
-          durasi={45}
+          // Lebih lambat: 45s terasa terburu-buru tepat di bawah CTA hero.
+          durasi={70}
           items={(categories ?? []).map((cat) => (
-            <span key={cat.id} className="flex items-center gap-2.5">
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: categoryColor(cat.slug) }}
-              />
-              <span className="font-heading text-sm font-semibold uppercase tracking-[0.14em] text-foreground">
-                {cat.name_id}
-              </span>
+            // Tanpa titik warna per kategori. Sembilan warna jenuh di satu pita
+            // bertabrakan dengan palet krem/terracotta; warnanya tetap hidup di
+            // penanda peta dan kartu fasilitas, tempat warna memang bermakna.
+            <span
+              key={cat.id}
+              className="font-heading text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground"
+            >
+              {cat.name_id}
             </span>
           ))}
         />

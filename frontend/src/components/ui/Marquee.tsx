@@ -27,8 +27,10 @@ export function Marquee({ items, durasi = 40, className }: MarqueeProps) {
           <div key={salinan} className="flex shrink-0 items-center">
             {items.map((item, i) => (
               <div key={`${salinan}-${i}`} className="flex items-center">
-                <span className="px-6 whitespace-nowrap">{item}</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-primary/40 shrink-0" />
+                <span className="px-7 whitespace-nowrap">{item}</span>
+                {/* Garis tipis, bukan titik berwarna: titik menambah bintik pada pita
+                    yang sudah padat, sedangkan garis membaur jadi ritme. */}
+                <span className="w-px h-3 bg-border shrink-0" />
               </div>
             ))}
           </div>
@@ -36,8 +38,10 @@ export function Marquee({ items, durasi = 40, className }: MarqueeProps) {
       </div>
 
       {/* Tepi memudar supaya teks tidak terpotong mendadak di sisi layar */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-surface to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-surface to-transparent" />
+      {/* Tepi memudar lebih lebar supaya teks masuk & keluar perlahan, tidak
+          muncul-hilang mendadak di pinggir layar. */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-28 sm:w-40 bg-gradient-to-r from-surface to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-28 sm:w-40 bg-gradient-to-l from-surface to-transparent" />
     </div>
   )
 }
