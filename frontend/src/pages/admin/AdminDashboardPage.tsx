@@ -49,9 +49,12 @@ export function AdminDashboardPage() {
   const apbdTotals = useMemo(() => {
     let pendapatan = 0
     let belanja = 0
+    // Cocokkan tipe secara eksplisit: baris 'pelaksanaan' adalah ringkasan
+    // realisasi, bukan belanja. Pola `else` membuatnya ikut terjumlah dan
+    // angka belanja di dasbor jadi lebih besar dari kenyataan.
     for (const item of apbdItems) {
       if (item.type === 'pendapatan') pendapatan += item.amount
-      else belanja += item.amount
+      else if (item.type === 'belanja') belanja += item.amount
     }
     return { pendapatan, belanja, year: latestYear }
   }, [apbdItems, latestYear])
@@ -119,7 +122,9 @@ export function AdminDashboardPage() {
       {/* Main Chart Section: Revenue & APBD Trends */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <RevenueChart items={apbdItems} />
+          {/* Seluruh tahun, bukan tahun terbaru saja: grafiknya kini bersumbu
+              tahun, jadi memberi satu tahun hanya menghasilkan satu batang. */}
+          <RevenueChart items={apbd.data ?? []} />
         </div>
         <CategoryDonut locations={locationList} categories={categoryList} />
       </div>

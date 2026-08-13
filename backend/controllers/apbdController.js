@@ -2,9 +2,23 @@ const pool = require('../db');
 const createCrud = require('../lib/crudFactory');
 
 const crud = createCrud('apbd_items', {
-  allowedFields: ['year', 'type', 'category', 'amount', 'sort_order'],
+  allowedFields: ['year', 'type', 'category', 'amount', 'realisasi', 'sort_order'],
   orderBy: 'year DESC, sort_order ASC',
 });
+
+/**
+ * `realisasi` boleh kosong (pos yang belum terserap). Form mengirim string kosong
+ * saat dikosongkan, dan '' ditolak MySQL mode strict untuk kolom BIGINT — jadi
+ * dinormalkan jadi NULL sebelum diteruskan ke factory CRUD.
+ */
+const normalkanRealisasi = (handler) => (req, res) => {
+  if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'realisasi')) {
+    const v = req.body.realisasi;
+    req.body.realisasi = v === '' || v === null || v === undefined ? null : Number(v);
+    if (Number.isNaN(req.body.realisasi)) req.body.realisasi = null;
+  }
+  return handler(req, res);
+};
 
 const getSummary = async (req, res) => {
   try {
@@ -20,4 +34,9 @@ const getSummary = async (req, res) => {
   }
 };
 
-module.exports = { ...crud, getSummary };
+module.exports = {
+  ...crud,
+  create: normalkanRealisasi(crud.create),
+  update: normalkanRealisasi(crud.update),
+  getSummary,
+};

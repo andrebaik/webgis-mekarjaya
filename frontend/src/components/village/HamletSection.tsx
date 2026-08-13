@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Home, Users, IdCard } from 'lucide-react'
 import { AnimatedSection } from '../AnimatedSection'
 import { formatNumber } from '../../lib/utils'
+import { easeKeluar } from '../../lib/motion'
 import type { Hamlet } from '../../types'
 import { SectionHeading } from '../ui/SectionHeading'
 
@@ -16,10 +17,9 @@ const NAMA_BULAN = [
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
 ]
 
-const barColors = ['#171717', '#C2410C', '#10B981', '#06B6D4', '#8B5CF6', '#F59E0B', '#EC4899']
-
 export function HamletSection({ rows }: HamletSectionProps) {
   const { t } = useTranslation()
+  const reduceMotion = useReducedMotion()
 
   const data = useMemo(
     () =>
@@ -51,10 +51,10 @@ export function HamletSection({ rows }: HamletSectionProps) {
   const totalPenduduk = total.male + total.female
   const persenKtp = total.ktpRequired > 0 ? Math.round((total.ktpDone / total.ktpRequired) * 100) : null
 
-  const chartData = data.map((h) => ({
-    label: `RW ${h.rw} · ${h.name}`,
-    total: h.total,
-  }))
+  // Diurutkan menurun: yang ingin dibaca dari visual ini adalah PERINGKAT dusun,
+  // sesuatu yang tidak terbaca dari tabel di bawah yang tersusun menurut nomor RW.
+  const peringkat = [...data].sort((a, b) => b.total - a.total)
+  const terbesar = peringkat[0]?.total || 1
 
   return (
     <section
@@ -108,34 +108,72 @@ export function HamletSection({ rows }: HamletSectionProps) {
           </div>
         </div>
 
-        {/* Grafik penduduk per dusun */}
+        {/* Peringkat penduduk per dusun.
+            Menggantikan bar chart Recharts yang memberi tiap dusun warna berbeda:
+            ketujuh batang mengukur besaran yang sama, jadi warnanya tidak membawa
+            arti apa pun dan hanya melawan palet halaman. Di sini warna dipakai
+            untuk membedakan laki-laki dan perempuan, dan itu memang bermakna. */}
         <div className="bg-surface-card rounded-3xl border border-border p-6 md:p-8 mb-6">
-          <h3 className="font-heading font-bold text-sm text-foreground uppercase tracking-wider mb-5">
-            {t('village.hamlet_chart')}
-          </h3>
-          <ResponsiveContainer width="100%" height={Math.max(180, chartData.length * 48)}>
-            <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 24, top: 0, bottom: 0 }}>
-              <XAxis type="number" hide />
-              <YAxis
-                type="category"
-                dataKey="label"
-                width={170}
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 11, fill: '#737373' }}
-              />
-              <Tooltip
-                cursor={{ fill: 'rgba(0,0,0,0.04)' }}
-                formatter={(value) => [formatNumber(Number(value)), t('demografi.total')]}
-                contentStyle={{ borderRadius: 12, border: '1px solid #E5E5E5', fontSize: 12 }}
-              />
-              <Bar dataKey="total" radius={[0, 8, 8, 0]} barSize={18} isAnimationActive={false}>
-                {chartData.map((entry, i) => (
-                  <Cell key={entry.label} fill={barColors[i % barColors.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="flex flex-wrap items-baseline justify-between gap-3 mb-6">
+            <h3 className="font-heading font-bold text-sm text-foreground uppercase tracking-wider">
+              {t('village.hamlet_chart')}
+            </h3>
+            <div className="flex items-center gap-4 text-[11px] font-medium text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-foreground" />
+                {t('demografi.male')}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-primary" />
+                {t('demografi.female')}
+              </span>
+            </div>
+          </div>
+
+          <ol className="space-y-4">
+            {peringkat.map((h, i) => (
+              <li key={h.id}>
+                <div className="flex items-baseline justify-between gap-4 mb-1.5">
+                  <span className="text-xs font-semibold text-foreground truncate">
+                    <span className="text-muted-foreground tabular-nums mr-2">{i + 1}</span>
+                    {h.name}
+                    <span className="text-muted-foreground font-medium ml-1.5">RW {h.rw}</span>
+                  </span>
+                  <span className="text-xs font-bold text-foreground tabular-nums shrink-0">
+                    {formatNumber(h.total)}
+                  </span>
+                </div>
+
+                {/* Lebar bilah relatif terhadap dusun terbesar, bukan terhadap total
+                    desa: dengan tujuh dusun, skala terhadap total membuat semua
+                    bilah pendek dan selisihnya tidak terbaca. */}
+                <motion.div
+                  className="flex h-2.5 rounded-full overflow-hidden bg-muted"
+                  initial={reduceMotion ? false : { scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true, amount: 0.6 }}
+                  transition={{ duration: 0.6, delay: i * 0.05, ease: easeKeluar }}
+                  style={{ width: `${(h.total / terbesar) * 100}%`, transformOrigin: 'left' }}
+                >
+                  <span
+                    className="bg-foreground h-full"
+                    style={{ width: `${(h.male / h.total) * 100}%` }}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className="bg-primary h-full flex-1"
+                    aria-hidden="true"
+                  />
+                </motion.div>
+
+                <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground tabular-nums">
+                  <span>{formatNumber(h.male)} {t('demografi.male').toLowerCase()}</span>
+                  <span aria-hidden="true" className="w-px h-3 bg-border" />
+                  <span>{formatNumber(h.female)} {t('demografi.female').toLowerCase()}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
 
         {/* Tabel rinci */}

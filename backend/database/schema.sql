@@ -98,7 +98,11 @@ CREATE TABLE IF NOT EXISTS `apbd_items` (
     -- 'pendapatan' & 'belanja' = rincian per pos anggaran.
     `type` ENUM('pelaksanaan', 'pendapatan', 'belanja') NOT NULL,
     `category` VARCHAR(100) NOT NULL,
+    -- `amount` = pagu anggaran, `realisasi` = dana yang benar-benar terserap.
+    -- realisasi nullable: pos yang belum terealisasi berbeda maknanya dari
+    -- pos yang terealisasi Rp 0, dan itu harus bisa dibedakan.
     `amount` BIGINT NOT NULL DEFAULT 0,
+    `realisasi` BIGINT DEFAULT NULL,
     `sort_order` INT DEFAULT 0,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

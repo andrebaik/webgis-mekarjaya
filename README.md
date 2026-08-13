@@ -267,4 +267,21 @@ Dua keputusan yang sengaja diambil:
 
 ## Lisensi
 
-Belum ditentukan.
+Repositori ini memuat dua hal dengan ketentuan berbeda.
+
+**Kode sumber** — [MIT License](LICENSE), © 2026 KKN ITG 02 Mekarjaya .
+Bebas dipakai, diubah, dan disebarluaskan, termasuk oleh desa lain yang
+ingin membangun portal serupa, selama pemberitahuan hak cipta dipertahankan.
+
+**Data desa** — © Pemerintah Desa Mekarjaya, Kecamatan Cikajang, Kabupaten Garut.
+Mencakup isi basis data (profil desa, rekap penduduk per dusun, pos APBDes,
+periode kepala desa), berkas GeoJSON di `frontend/public/geojson/`, foto lokasi
+di `backend/uploads/`, dan lambang desa. Seluruhnya dikumpulkan melalui survei
+lapangan bersama perangkat desa dan **tidak** tercakup lisensi MIT di atas.
+Penggunaan ulang memerlukan izin Pemerintah Desa Mekarjaya.
+
+## Atribusi
+
+- Ubin peta dasar: © [OpenStreetMap](https://www.openstreetmap.org/copyright)
+  contributors, dilisensikan ODbL
+- Data lokasi dan batas wilayah: survei lapangan bersama Pemerintah Desa Mekarjaya

@@ -65,7 +65,10 @@ export interface ApbdItem {
   year: number
   type: ApbdType
   category: string
+  /** Pagu anggaran. */
   amount: number
+  /** Dana terserap. `null` = belum ada realisasi, berbeda dari terealisasi Rp 0. */
+  realisasi: number | null
   sort_order: number
 }
 
