@@ -15,15 +15,20 @@ export function RevenueChart({ items }: RevenueChartProps) {
   const { t } = useTranslation()
   const [timePeriod, setTimePeriod] = useState<'weekly' | 'monthly' | 'yearly'>('monthly')
 
+  // Dikelompokkan per TAHUN, bukan per pos anggaran. Judulnya "Pendapatan &
+  // Belanja", jadi sumbu waktu yang memberi arti — bukan daftar pos yang bisa
+  // berjumlah belasan dan membuat labelnya bertumpuk.
   const data = useMemo(() => {
-    const map = new Map<string, { category: string; pendapatan: number; belanja: number }>()
+    const map = new Map<number, { year: number; pendapatan: number; belanja: number }>()
     for (const item of items) {
-      const row = map.get(item.category) ?? { category: item.category, pendapatan: 0, belanja: 0 }
+      const row = map.get(item.year) ?? { year: item.year, pendapatan: 0, belanja: 0 }
+      // Cocokkan tipe secara eksplisit — baris 'pelaksanaan' adalah ringkasan
+      // realisasi dan akan menggandakan angka bila ikut dijumlahkan di sini.
       if (item.type === 'pendapatan') row.pendapatan += item.amount
-      else row.belanja += item.amount
-      map.set(item.category, row)
+      else if (item.type === 'belanja') row.belanja += item.amount
+      map.set(item.year, row)
     }
-    return Array.from(map.values())
+    return Array.from(map.values()).sort((a, b) => a.year - b.year)
   }, [items])
 
   const totalPendapatan = useMemo(
@@ -102,7 +107,7 @@ export function RevenueChart({ items }: RevenueChartProps) {
             <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
               <XAxis
-                dataKey="category"
+                dataKey="year"
                 tick={{ fontSize: 11, fill: '#737373', fontWeight: 500 }}
                 tickLine={false}
                 axisLine={false}

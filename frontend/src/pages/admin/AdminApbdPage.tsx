@@ -18,6 +18,8 @@ interface ApbdForm {
   type: ApbdType
   category: string
   amount: number
+  /** '' = belum ada realisasi; dikirim sebagai null ke server. */
+  realisasi: number | ''
   sort_order: number
 }
 
@@ -26,6 +28,7 @@ const emptyForm: ApbdForm = {
   type: 'pelaksanaan',
   category: '',
   amount: 0,
+  realisasi: '',
   sort_order: 0,
 }
 
@@ -73,16 +76,18 @@ export function AdminApbdPage() {
       type: row.type,
       category: row.category,
       amount: row.amount,
+      realisasi: row.realisasi ?? '',
       sort_order: row.sort_order,
     })
     setShowForm(true)
   }
 
   const handleSave = async () => {
+    const body = { ...form, realisasi: form.realisasi === '' ? null : Number(form.realisasi) }
     if (editing) {
-      await adminUpdate(`/api/admin/apbd/${editing.id}`, form)
+      await adminUpdate(`/api/admin/apbd/${editing.id}`, body)
     } else {
-      await adminCreate('/api/admin/apbd', form)
+      await adminCreate('/api/admin/apbd', body)
     }
     await invalidate()
     resetForm()
@@ -105,8 +110,17 @@ export function AdminApbdPage() {
         </Badge>
       ),
     },
-    { key: 'category', label: t('village.apbd_pos'), render: (r) => <span className="font-medium text-foreground">{r.category}</span> },
-    { key: 'amount', label: t('admin.amount'), render: (r) => <span className="font-medium tabular-nums text-right">{formatRp(r.amount)}</span> },
+    { key: 'amount', label: t('village.apbd_anggaran'), render: (r) => <span className="font-medium tabular-nums">{formatRp(r.amount)}</span> },
+    {
+      key: 'realisasi',
+      label: t('village.apbd_realisasi'),
+      render: (r) =>
+        r.realisasi == null ? (
+          <span className="text-muted-foreground">—</span>
+        ) : (
+          <span className="font-medium tabular-nums">{formatRp(r.realisasi)}</span>
+        ),
+    },
   ]
 
   return (
@@ -167,7 +181,7 @@ export function AdminApbdPage() {
             </Button>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">{t('admin.year')}</label>
                 <Input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: Number(e.target.value) })} />
@@ -203,6 +217,18 @@ export function AdminApbdPage() {
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">{t('admin.amount')}</label>
                 <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{t('admin.realisasi')}</label>
+                <Input
+                  type="number"
+                  value={form.realisasi}
+                  placeholder="—"
+                  onChange={(e) =>
+                    setForm({ ...form, realisasi: e.target.value === '' ? '' : Number(e.target.value) })
+                  }
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">{t('admin.realisasi_hint')}</p>
               </div>
             </div>
           </div>

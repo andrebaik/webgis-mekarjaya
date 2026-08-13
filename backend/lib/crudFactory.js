@@ -7,6 +7,15 @@ const parseJsonIfNeeded = (value) => {
   return value;
 };
 
+/**
+ * Nilai yang perlu disimpan sebagai JSON. `null` sengaja dikecualikan: di
+ * JavaScript `typeof null === 'object'`, sehingga tanpa penjagaan ini setiap
+ * null berubah jadi STRING 'null' dan MySQL menolaknya untuk kolom angka
+ * (ER_TRUNCATED_WRONG_VALUE_FOR_FIELD) — atau lebih buruk, tersimpan sebagai
+ * teks 'null' di kolom teks.
+ */
+const perluJson = (v) => v !== null && (Array.isArray(v) || typeof v === 'object');
+
 const createCrud = (table, options = {}) => {
   const { orderBy = 'sort_order ASC, id ASC', listColumns = '*' } = options;
 
@@ -48,7 +57,7 @@ const createCrud = (table, options = {}) => {
       const fields = allowed.filter((f) => f !== 'id' && data[f] !== undefined);
       const placeholders = fields.map((f) => {
         const v = data[f];
-        values.push(Array.isArray(v) || typeof v === 'object' ? JSON.stringify(v) : v);
+        values.push(perluJson(v) ? JSON.stringify(v) : v);
         return '?';
       }).join(', ');
 
@@ -88,7 +97,7 @@ const createCrud = (table, options = {}) => {
         if (data[f] !== undefined) {
           const v = data[f];
           fields.push(`${f} = ?`);
-          values.push(Array.isArray(v) || typeof v === 'object' ? JSON.stringify(v) : v);
+          values.push(perluJson(v) ? JSON.stringify(v) : v);
         }
       });
 
