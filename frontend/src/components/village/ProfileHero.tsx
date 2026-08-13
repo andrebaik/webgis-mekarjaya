@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { MapPin, Phone, Mail } from 'lucide-react'
+import ScrollExpand from '../ui/scroll-expand'
 import type { VillageProfile } from '../../types'
 
 interface ProfileHeroProps {
@@ -14,6 +15,7 @@ interface ProfileHeroProps {
  */
 export function ProfileHero({ profile }: ProfileHeroProps) {
   const { t } = useTranslation()
+  const reduceMotion = useReducedMotion()
   const desc = profile.description_id
 
   const kontak = [
@@ -22,10 +24,13 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
     profile.email && { icon: Mail, label: t('village.email'), value: profile.email },
   ].filter(Boolean) as { icon: typeof MapPin; label: string; value: string }[]
 
+  const fotoAlt = t('village.photo_alt', { name: profile.name_id })
+
   return (
+    <>
     <section
       id="gambaran-umum"
-      className="border-b border-border/60 pt-14 pb-16 md:pt-20 md:pb-20 scroll-mt-32"
+      className="pt-14 pb-16 md:pt-20 md:pb-20 scroll-mt-32"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -79,28 +84,64 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
           )}
         </div>
 
-        {/* Foto desa dari kolom image_url. Dipasang sebagai pita lebar di bawah teks,
-            bukan foto latar seperti hero beranda — supaya kedua hero tetap terbedakan
-            dan teksnya tidak perlu scrim untuk menjaga kontras. */}
-        {profile.image_url && (
-          <motion.figure
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.32 }}
-            className="mt-12 rounded-3xl overflow-hidden border border-border bg-muted"
-          >
-            <img
-              src={profile.image_url}
-              alt={t('village.photo_alt', { name: profile.name_id })}
-              loading="lazy"
-              decoding="async"
-              // aspect-ratio menahan ruangnya sebelum gambar termuat, supaya tidak
-              // terjadi lompatan tata letak (CLS) saat foto akhirnya masuk.
-              className="w-full aspect-[16/7] object-cover"
-            />
-          </motion.figure>
-        )}
       </div>
     </section>
+
+    {/* Foto desa dengan bingkai yang memuai mengikuti scroll, tapi DIBATASI:
+        tetap di dalam kontainer max-w-7xl dan panggungnya hanya 62% tinggi layar.
+        Halaman ini masih punya enam seksi di bawahnya, jadi media yang memenuhi
+        layar membuat pengunjung kehilangan konteks sekitarnya. */}
+    {profile.image_url && (
+      reduceMotion ? (
+        // Jalur pengurangan gerak: foto biasa. ScrollExpand tetap memuai walau
+        // smoothing dimatikan, dan lintasannya memakan ~2 layar scroll — kalau
+        // sekadar dinonaktifkan, yang tersisa adalah ruang kosong sepanjang itu.
+        <figure className="border-y border-border/60 bg-muted">
+          <img
+            src={profile.image_url}
+            alt={fotoAlt}
+            loading="lazy"
+            decoding="async"
+            className="w-full aspect-[16/7] object-cover"
+          />
+        </figure>
+      ) : (
+        <div className="px-4 sm:px-6 lg:px-8">
+          {/* JANGAN tambahkan overflow-hidden di sini. Panggung di dalam
+              ScrollExpand memakai position:sticky, dan leluhur ber-overflow
+              selain visible membatalkannya — akibatnya foto ikut naik sambil
+              memuai dan sudah keluar layar sebelum terbuka penuh.
+              Sudut membulat sudah ditangani clip-path komponen (endRadius). */}
+          <div className="max-w-7xl mx-auto">
+            <ScrollExpand
+              src={profile.image_url}
+              alt={fotoAlt}
+              useWindowScroll
+              // Panggung 62% tinggi layar, bukan 100%: inilah yang menahannya
+              // dari full-bleed sekaligus memangkas panjang scroll.
+              stageVh={62}
+              // Lintasan memuai + jeda tahan setelah terbuka penuh. Dengan
+              // panggung 62% layar, 1,1 + 0,25 = 1,35 panggung setara ~0,84 layar
+              // scroll: cukup untuk membuka penuh lalu tertahan sejenak, tanpa
+              // memakan ruang seperti bawaannya (2,55 layar).
+              scrollDistance={1.1}
+              holdDistance={0.25}
+              // Bingkai istirahat dibuat besar; di panggung yang sudah dipendekkan,
+              // 42x58 bawaan menyisakan foto sekecil kartu nama.
+              startWidth={70}
+              startHeight={74}
+              // Sudut tetap membulat saat memuai penuh, senada kartu lain di halaman.
+              startRadius={24}
+              endRadius={24}
+              mediaZoom={1.18}
+              // Tanpa judul maupun konten overlay, jadi scrim penggelap tidak ada
+              // gunanya selain menggelapkan foto desanya sendiri.
+              overlayScrim={0}
+            />
+          </div>
+        </div>
+      )
+    )}
+    </>
   )
 }

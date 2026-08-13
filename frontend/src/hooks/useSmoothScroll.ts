@@ -20,32 +20,6 @@ export function scrollKeAtas() {
 }
 
 /**
- * Gulir ke sebuah elemen, menyisakan `ruangAtas` px di atasnya (untuk bar sticky).
- *
- * Posisi dihitung sendiri lalu dikirim sebagai ANGKA dengan `immediate: true`.
- * Diuji satu per satu di browser: bentuk `scrollTo(elemen)` dan `scrollTo(angka)`
- * beranimasi (baik default maupun dengan `duration` eksplisit) sama-sekali tidak
- * menggerakkan halaman di versi Lenis ini — scroll diam di 0 selama 2,5 detik.
- * Hanya `immediate` yang bekerja andal, sama seperti `scrollKeAtas`.
- *
- * Konsekuensinya lompatan ke seksi bersifat instan, bukan meluncur. Itu pilihan
- * sadar: perpindahan yang pasti terjadi lebih berharga daripada animasi yang
- * kadang tidak jalan sama sekali.
- *
- * Jalur tanpa Lenis memakai `behavior: 'auto'`, bukan `'smooth'`: selama Lenis
- * terpasang, scroll smooth bawaan peramban ikut ditelan.
- */
-export function scrollKeElemen(el: Element, ruangAtas = 0) {
-  const tujuan = el.getBoundingClientRect().top + window.scrollY - ruangAtas
-
-  if (lenisAktif) {
-    lenisAktif.scrollTo(tujuan, { immediate: true })
-    return
-  }
-  window.scrollTo({ top: tujuan, behavior: 'auto' })
-}
-
-/**
  * Smooth scroll ala referensi. Dipasang di RootLayout saja — halaman peta berada
  * di luar layout itu, jadi Leaflet tetap memakai scroll native (lenis mengambil
  * alih wheel event dan akan mengacaukan zoom peta).
