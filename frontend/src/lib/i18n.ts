@@ -118,14 +118,6 @@ const resources = {
       kk: 'Kepala Keluarga',
       rt_total: '{{count}} RT',
       ktp_done: 'Sudah Rekam KTP',
-
-      nav_hamlets: 'Dusun',
-      nav_overview: 'Gambaran Umum',
-      nav_vision: 'Visi & Misi',
-      nav_region: 'Wilayah',
-      nav_facilities: 'Fasilitas',
-      nav_apbd: 'APBDesa',
-      nav_period: 'Periode',
     },
     admin: {
       login_title: 'Login Admin',
